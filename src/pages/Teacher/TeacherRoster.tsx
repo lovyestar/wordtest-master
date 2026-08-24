@@ -31,7 +31,9 @@ export default function TeacherRoster() {
               key={teacher.uid}
               className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm"
             >
-              <span className="font-medium text-slate-800">{teacher.displayName ?? '이름 없음'}</span>
+              <span className="font-medium text-slate-800">
+                {teacher.displayName ? `${teacher.displayName} 선생님` : '이름 없음'}
+              </span>
               <span className="ml-2 text-xs text-slate-400">{teacher.email}</span>
             </li>
           ))

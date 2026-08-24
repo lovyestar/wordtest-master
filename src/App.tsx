@@ -16,6 +16,7 @@ import ExamList from './pages/Teacher/Exams/ExamList'
 import ExamMonitor from './pages/Teacher/Exams/ExamMonitor'
 import ExamNew from './pages/Teacher/Exams/ExamNew'
 import TeacherAdmins from './pages/Teacher/TeacherAdmins'
+import TeacherApplications from './pages/Teacher/TeacherApplications'
 import TeacherDashboard from './pages/Teacher/TeacherDashboard'
 import TeacherLogin from './pages/Teacher/TeacherLogin'
 import TeacherRoster from './pages/Teacher/TeacherRoster'
@@ -70,6 +71,7 @@ export default function App() {
             <Route path="/teacher/exams/new" element={<ExamNew />} />
             <Route path="/teacher/exams/:sessionId" element={<ExamMonitor />} />
             <Route path="/teacher/teachers" element={<TeacherRoster />} />
+            <Route path="/teacher/applications" element={<TeacherApplications />} />
             <Route path="/teacher/admins" element={<TeacherAdmins />} />
           </Route>
         </Route>

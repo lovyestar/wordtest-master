@@ -73,7 +73,7 @@ export default function TeacherSignup() {
       </a>
       <h1 className="text-xl font-bold text-slate-900">선생님 가입 신청</h1>
       <p className="mt-2 text-sm text-slate-500">
-        구글 계정으로 로그인 후 이름을 입력하면 관리자 승인 후 관리자 페이지를 이용할 수 있습니다.
+        구글 계정으로 로그인 후 이름을 입력하면 선생님 등록 승인 후 관리자 페이지를 이용할 수 있습니다.
       </p>
 
       {!firebaseUser ? (
