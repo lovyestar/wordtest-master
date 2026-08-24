@@ -18,10 +18,23 @@ service cloud.firestore {
       allow write: if isSignedIn() && request.auth.uid == uid;
     }
 
-    // ---- Admin allowlist: never client-writable ----
+    // ---- Admin allowlist: never client-writable (Cloud Function only,
+    // after an existing admin approves a teacherApplications entry) ----
     match /admins/{uid} {
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
       allow write: if false;
+    }
+
+    // ---- Teacher signup requests: self-submitted, admin-reviewed. The
+    // actual admins/{uid} grant is created by a Cloud Function so a client
+    // can never approve their own (or anyone else's) request. ----
+    match /teacherApplications/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.status == 'pending';
+      allow update, delete: if false; // Cloud Function (approve/reject) only
     }
 
     // ---- Word sets & entries: public read to signed-in users, admin-only write ----

@@ -7,7 +7,7 @@ import {
   updateDoc,
   writeBatch,
 } from 'firebase/firestore'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useWordSetEntries } from '../../../hooks/useWordSetEntries'
 import { useWordSets } from '../../../hooks/useWordSets'
@@ -18,6 +18,14 @@ export default function WordSetEditor() {
   const { wordSets } = useWordSets()
   const { entries, loading } = useWordSetEntries(setId)
   const set = wordSets.find((s) => s.id === setId)
+
+  const [editingName, setEditingName] = useState(false)
+  const [nameDraft, setNameDraft] = useState('')
+  const [savingName, setSavingName] = useState(false)
+
+  useEffect(() => {
+    if (set && !editingName) setNameDraft(set.name)
+  }, [set, editingName])
 
   const [word, setWord] = useState('')
   const [meaning, setMeaning] = useState('')
@@ -54,6 +62,21 @@ export default function WordSetEditor() {
   async function toggleActive() {
     if (!set) return
     await updateDoc(doc(db, 'wordSets', setId!), { active: !set.active })
+  }
+
+  async function handleSaveName() {
+    const trimmed = nameDraft.trim()
+    if (!trimmed || trimmed === set?.name) {
+      setEditingName(false)
+      return
+    }
+    setSavingName(true)
+    try {
+      await updateDoc(doc(db, 'wordSets', setId!), { name: trimmed })
+      setEditingName(false)
+    } finally {
+      setSavingName(false)
+    }
   }
 
   async function handleBulkImport() {
@@ -99,7 +122,43 @@ export default function WordSetEditor() {
       </Link>
       <div className="mt-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{set?.name ?? '단어장'}</h1>
+          {editingName ? (
+            <div className="flex items-center gap-2">
+              <input
+                autoFocus
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+                className="rounded-lg border border-slate-300 px-3 py-1.5 text-2xl font-bold text-slate-900 focus:border-indigo-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleSaveName}
+                disabled={savingName}
+                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                저장
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditingName(false)}
+                className="text-sm text-slate-400 hover:text-slate-600"
+              >
+                취소
+              </button>
+            </div>
+          ) : (
+            <h1 className="text-2xl font-bold text-slate-900">
+              {set?.name ?? '단어장'}{' '}
+              <button
+                type="button"
+                onClick={() => setEditingName(true)}
+                className="align-middle text-xs font-normal text-slate-400 hover:text-indigo-600"
+              >
+                수정
+              </button>
+            </h1>
+          )}
           <p className="mt-1 text-sm text-slate-500">{entries.length}개 단어</p>
         </div>
         {set && (

@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { doc, getDoc } from 'firebase/firestore'
+import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { signInAdmin, signOutUser } from '../../lib/auth'
+import { db } from '../../lib/firebase'
 import { useAuthStore } from '../../store/authStore'
+import type { TeacherApplicationStatus } from '../../types'
 
 export default function TeacherLogin() {
   const { firebaseUser, adminProfile, loading } = useAuthStore()
@@ -9,13 +12,30 @@ export default function TeacherLogin() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [applicationStatus, setApplicationStatus] = useState<TeacherApplicationStatus | 'none' | null>(null)
+
+  useEffect(() => {
+    if (!firebaseUser || adminProfile) return
+    getDoc(doc(db, 'teacherApplications', firebaseUser.uid)).then((snap) => {
+      setApplicationStatus(snap.exists() ? (snap.data().status as TeacherApplicationStatus) : 'none')
+    })
+  }, [firebaseUser, adminProfile])
 
   if (!loading && firebaseUser && adminProfile) return <Navigate to="/teacher" replace />
 
   if (!loading && firebaseUser && !adminProfile) {
     return (
       <div className="mx-auto mt-24 max-w-sm text-center">
-        <p className="text-sm font-semibold text-red-600">관리자 권한이 없는 계정입니다.</p>
+        {applicationStatus === 'pending' ? (
+          <>
+            <p className="text-sm font-semibold text-amber-600">관리자 승인 대기 중입니다.</p>
+            <p className="mt-1 text-xs text-slate-500">승인이 완료되면 이 계정으로 관리자 페이지를 이용할 수 있어요.</p>
+          </>
+        ) : applicationStatus === 'rejected' ? (
+          <p className="text-sm font-semibold text-red-600">가입 신청이 거절되었습니다.</p>
+        ) : (
+          <p className="text-sm font-semibold text-red-600">관리자 권한이 없는 계정입니다.</p>
+        )}
         <p className="mt-1 text-xs text-slate-500">{firebaseUser.email}</p>
         <button
           type="button"
@@ -70,6 +90,9 @@ export default function TeacherLogin() {
           {submitting ? '로그인 중...' : '로그인'}
         </button>
       </form>
+      <a href="/teacher/signup" className="mt-6 block text-center text-xs text-slate-400 hover:text-slate-600">
+        처음이신가요? 선생님 가입 신청
+      </a>
     </div>
   )
 }

@@ -1,6 +1,5 @@
 import { initializeApp } from 'firebase-admin/app'
-import { FieldValue, getFirestore, type Timestamp } from 'firebase-admin/firestore'
-import { onDocumentCreated } from 'firebase-functions/v2/firestore'
+import { FieldValue, getFirestore } from 'firebase-admin/firestore'
 import { HttpsError, onCall } from 'firebase-functions/v2/https'
 import { setGlobalOptions } from 'firebase-functions/v2'
 import { getKstDateKey, isCorrectAnswer, type ExamDirection } from './grading.js'
@@ -87,6 +86,7 @@ export const submitMockExamAttempt = onCall<SubmitMockExamPayload>(async (reques
   const accuracy = totalQuestions > 0 ? correctCount / totalQuestions : 0
 
   const attemptRef = db.collection('mockExamAttempts').doc()
+  const submittedAt = new Date()
   await attemptRef.set({
     uid,
     wordSetId,
@@ -96,74 +96,67 @@ export const submitMockExamAttempt = onCall<SubmitMockExamPayload>(async (reques
     wrongCount,
     accuracy,
     answers: graded,
-    submittedAt: FieldValue.serverTimestamp(),
+    submittedAt,
+  })
+
+  // Leaderboard aggregation runs inline (not via a separate Firestore
+  // trigger) so a submission either fully lands — attempt + leaderboard
+  // together — or fails loudly to the caller. A previous trigger-based
+  // design silently lost updates whenever the trigger was mid-redeploy.
+  await updateLeaderboard(uid, wordSetId, {
+    accuracy,
+    correctCount,
+    wrongCount,
+    totalQuestions,
+    submittedAt,
   })
 
   return { attemptId: attemptRef.id, totalQuestions, correctCount, wrongCount, accuracy, answers: graded }
 })
 
-// ---- Leaderboard aggregation: only the day's best accuracy per user is kept. ----
+async function updateLeaderboard(
+  uid: string,
+  wordSetId: string,
+  attempt: { accuracy: number; correctCount: number; wrongCount: number; totalQuestions: number; submittedAt: Date },
+) {
+  const dateKey = getKstDateKey(attempt.submittedAt)
+  const userSnap = await db.doc(`users/${uid}`).get()
+  const user = userSnap.data() as { displayName?: string; photoURL?: string } | undefined
 
-export const onMockExamAttemptCreate = onDocumentCreated(
-  'mockExamAttempts/{attemptId}',
-  async (event) => {
-    const snap = event.data
-    if (!snap) return
-    const attempt = snap.data() as {
-      uid: string
-      wordSetId: string
-      accuracy: number
-      correctCount: number
-      wrongCount: number
-      totalQuestions: number
-      submittedAt: Timestamp
+  const leaderboardCollection = db.collection(`leaderboards/${dateKey}/wordSets/${wordSetId}/entries`)
+  const leaderboardRef = leaderboardCollection.doc(uid)
+
+  let wroteNewBest = false
+  await db.runTransaction(async (tx) => {
+    const existing = await tx.get(leaderboardRef)
+    if (existing.exists && (existing.data()?.bestAccuracy ?? 0) >= attempt.accuracy) {
+      return
     }
-    if (!attempt.submittedAt) return
-
-    const dateKey = getKstDateKey(attempt.submittedAt.toDate())
-    const userSnap = await db.doc(`users/${attempt.uid}`).get()
-    const user = userSnap.data() as { displayName?: string; photoURL?: string } | undefined
-
-    const leaderboardCollection = db.collection(
-      `leaderboards/${dateKey}/wordSets/${attempt.wordSetId}/entries`,
-    )
-    const leaderboardRef = leaderboardCollection.doc(attempt.uid)
-
-    let wroteNewBest = false
-    await db.runTransaction(async (tx) => {
-      const existing = await tx.get(leaderboardRef)
-      if (existing.exists && (existing.data()?.bestAccuracy ?? 0) >= attempt.accuracy) {
-        return
-      }
-      wroteNewBest = true
-      tx.set(leaderboardRef, {
-        uid: attempt.uid,
-        displayName: user?.displayName ?? '익명',
-        photoURL: user?.photoURL ?? null,
-        bestAccuracy: attempt.accuracy,
-        correctCount: attempt.correctCount,
-        wrongCount: attempt.wrongCount,
-        totalQuestions: attempt.totalQuestions,
-        updatedAt: FieldValue.serverTimestamp(),
-      })
+    wroteNewBest = true
+    tx.set(leaderboardRef, {
+      uid,
+      displayName: user?.displayName ?? '익명',
+      photoURL: user?.photoURL ?? null,
+      bestAccuracy: attempt.accuracy,
+      correctCount: attempt.correctCount,
+      wrongCount: attempt.wrongCount,
+      totalQuestions: attempt.totalQuestions,
+      updatedAt: FieldValue.serverTimestamp(),
     })
+  })
 
-    // Award a lifetime "#1 finishes" counter the first time this user's
-    // entry becomes today's top score for this word set — not re-awarded
-    // on every subsequent resubmission while they stay in the lead.
-    if (wroteNewBest) {
-      const topSnap = await leaderboardCollection.orderBy('bestAccuracy', 'desc').limit(1).get()
-      const topDoc = topSnap.docs[0]
-      if (topDoc && topDoc.id === attempt.uid && topDoc.data().firstPlaceCounted !== true) {
-        await topDoc.ref.set({ firstPlaceCounted: true }, { merge: true })
-        await db.doc(`users/${attempt.uid}`).set(
-          { firstPlaceCount: FieldValue.increment(1) },
-          { merge: true },
-        )
-      }
+  // Award a lifetime "#1 finishes" counter the first time this user's
+  // entry becomes today's top score for this word set — not re-awarded
+  // on every subsequent resubmission while they stay in the lead.
+  if (wroteNewBest) {
+    const topSnap = await leaderboardCollection.orderBy('bestAccuracy', 'desc').limit(1).get()
+    const topDoc = topSnap.docs[0]
+    if (topDoc && topDoc.id === uid && topDoc.data().firstPlaceCounted !== true) {
+      await topDoc.ref.set({ firstPlaceCounted: true }, { merge: true })
+      await db.doc(`users/${uid}`).set({ firstPlaceCount: FieldValue.increment(1) }, { merge: true })
     }
-  },
-)
+  }
+}
 
 // ---- Proctored exam: attempt doc (with its fixed question snapshot) is
 // created directly by the client via security rules; only grading is
@@ -223,4 +216,80 @@ export const submitExamAttempt = onCall<SubmitExamPayload>(async (request) => {
   })
 
   return { totalQuestions, correctCount, wrongCount, accuracy, answers: graded }
+})
+
+// ---- Teacher signup approval: a prospective teacher self-registers a
+// Firebase Auth account and a `teacherApplications` doc client-side, but
+// only this function (called by an existing admin) can grant the
+// `admins/{uid}` doc that actually unlocks teacher access. ----
+
+interface ReviewTeacherApplicationPayload {
+  uid: string
+  approve: boolean
+}
+
+export const reviewTeacherApplication = onCall<ReviewTeacherApplicationPayload>(async (request) => {
+  const reviewerUid = request.auth?.uid
+  if (!reviewerUid) throw new HttpsError('unauthenticated', '로그인이 필요합니다.')
+
+  const reviewerSnap = await db.doc(`admins/${reviewerUid}`).get()
+  if (!reviewerSnap.exists) {
+    throw new HttpsError('permission-denied', '관리자만 승인/거절할 수 있습니다.')
+  }
+
+  const { uid, approve } = request.data ?? {}
+  if (!uid || typeof approve !== 'boolean') {
+    throw new HttpsError('invalid-argument', '잘못된 요청입니다.')
+  }
+
+  const applicationRef = db.doc(`teacherApplications/${uid}`)
+  const applicationSnap = await applicationRef.get()
+  if (!applicationSnap.exists) {
+    throw new HttpsError('not-found', '신청 내역을 찾을 수 없습니다.')
+  }
+  const application = applicationSnap.data() as { email: string; name: string; status: string }
+  if (application.status !== 'pending') {
+    throw new HttpsError('failed-precondition', '이미 처리된 신청입니다.')
+  }
+
+  await applicationRef.update({
+    status: approve ? 'approved' : 'rejected',
+    reviewedAt: FieldValue.serverTimestamp(),
+    reviewedBy: reviewerUid,
+  })
+
+  if (approve) {
+    await db.doc(`admins/${uid}`).set({
+      email: application.email,
+      displayName: application.name,
+      role: 'teacher',
+      createdAt: FieldValue.serverTimestamp(),
+      createdBy: reviewerUid,
+    })
+  }
+
+  return { status: approve ? 'approved' : 'rejected' }
+})
+
+// ---- Admin removal: revokes an existing admin's access. Only callable by
+// another admin, and an admin cannot remove themselves (avoids accidentally
+// locking every admin out of the account). ----
+
+export const removeAdmin = onCall<{ uid: string }>(async (request) => {
+  const callerUid = request.auth?.uid
+  if (!callerUid) throw new HttpsError('unauthenticated', '로그인이 필요합니다.')
+
+  const callerSnap = await db.doc(`admins/${callerUid}`).get()
+  if (!callerSnap.exists) {
+    throw new HttpsError('permission-denied', '관리자만 삭제할 수 있습니다.')
+  }
+
+  const { uid } = request.data ?? {}
+  if (!uid) throw new HttpsError('invalid-argument', '잘못된 요청입니다.')
+  if (uid === callerUid) {
+    throw new HttpsError('failed-precondition', '본인 계정은 삭제할 수 없습니다.')
+  }
+
+  await db.doc(`admins/${uid}`).delete()
+  return { removed: true }
 })

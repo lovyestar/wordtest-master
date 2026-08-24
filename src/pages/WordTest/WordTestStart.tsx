@@ -39,6 +39,7 @@ export default function WordTestStart() {
         name: data.name,
         wordSetId: data.wordSetId,
         createdBy: data.createdBy,
+        createdByName: data.createdByName,
         createdAt: 0,
         durationSeconds: data.durationSeconds,
         questionCount: data.questionCount,
@@ -124,6 +125,7 @@ export default function WordTestStart() {
       <h1 className="text-xl font-bold text-slate-900">{session.name}</h1>
       <p className="mt-1 text-sm text-slate-500">
         문항 {session.questionCount}개 · 제한시간 {Math.round(session.durationSeconds / 60)}분
+        {session.createdByName && ` · 출제: ${session.createdByName}선생님`}
       </p>
 
       <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
