@@ -1,4 +1,4 @@
-import { collection, onSnapshot } from 'firebase/firestore'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { db } from '../../lib/firebase'
@@ -12,7 +12,10 @@ export default function TeacherAdmins() {
   const [processingUid, setProcessingUid] = useState<string | null>(null)
 
   useEffect(() => {
-    return onSnapshot(collection(db, 'admins'), (snap) => {
+    // Only super-admins ('admin' role) show up here — teachers have their
+    // own read-only roster at /teacher/teachers.
+    const q = query(collection(db, 'admins'), where('role', '==', 'admin'))
+    return onSnapshot(q, (snap) => {
       setAdmins(snap.docs.map((d) => ({ uid: d.id, ...d.data() }) as AdminProfile))
     })
   }, [])
