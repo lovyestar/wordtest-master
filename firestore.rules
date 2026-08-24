@@ -1,0 +1,88 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // ---- Student profiles ----
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ---- Admin allowlist: never client-writable ----
+    match /admins/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if false;
+    }
+
+    // ---- Word sets & entries: public read to signed-in users, admin-only write ----
+    match /wordSets/{setId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+
+      match /entries/{entryId} {
+        allow read: if isSignedIn();
+        allow write: if isAdmin();
+      }
+    }
+
+    // ---- Mock exam results: graded server-side only ----
+    match /mockExamAttempts/{attemptId} {
+      allow read: if isSignedIn() &&
+        (resource.data.uid == request.auth.uid || isAdmin());
+      allow write: if false; // Cloud Functions (Admin SDK) only
+    }
+
+    // ---- Daily leaderboard, split per word set: aggregated server-side only ----
+    match /leaderboards/{date}/wordSets/{wordSetId}/entries/{uid} {
+      allow read: if isSignedIn();
+      allow write: if false; // Cloud Functions (Admin SDK) only
+    }
+
+    // ---- Proctored exam sessions ----
+    match /examSessions/{sessionId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+
+      match /attempts/{uid} {
+        allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+
+        // Student creates their own attempt doc to start the exam.
+        allow create: if isSignedIn()
+          && request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && request.resource.data.status == 'in_progress'
+          && !('correctCount' in request.resource.data)
+          && !('answers' in request.resource.data);
+
+        // Only allowed client-side transition: self-flag as disqualified,
+        // or rotate activeSessionToken to claim the "active tab". Score
+        // fields are immutable from the client — only Cloud Functions
+        // (Admin SDK, bypassing rules) may write correctCount/answers/etc.
+        allow update: if isSignedIn()
+          && request.auth.uid == uid
+          && resource.data.status == 'in_progress'
+          && request.resource.data.status in ['in_progress', 'disqualified']
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['status', 'disqualifiedAt', 'disqualifiedReason', 'activeSessionToken']);
+
+        allow delete: if isAdmin();
+
+        match /violations/{violationId} {
+          allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+          allow create: if isSignedIn() && request.auth.uid == uid;
+          allow update, delete: if false;
+        }
+      }
+    }
+  }
+}
