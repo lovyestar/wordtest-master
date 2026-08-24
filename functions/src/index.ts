@@ -266,6 +266,18 @@ export const reviewTeacherApplication = onCall<ReviewTeacherApplicationPayload>(
       createdAt: FieldValue.serverTimestamp(),
       createdBy: reviewerUid,
     })
+    // Only now — actually approved — does the student-facing profile pick
+    // up the "{name} 선생님" nickname and skip the student-ID onboarding
+    // gate. A pending or rejected applicant must never show as a teacher.
+    await db.doc(`users/${uid}`).set(
+      {
+        name: application.name,
+        displayName: `${application.name} 선생님`,
+        isTeacher: true,
+        email: application.email,
+      },
+      { merge: true },
+    )
   }
   // Reject: leave the applicant's Auth account and `users/{uid}` profile
   // alone. Teachers sign in with the same Google account as students, so
