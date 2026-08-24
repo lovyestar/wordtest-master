@@ -14,7 +14,7 @@ const MODE_OPTIONS: { value: ExamSessionMode; label: string }[] = [
 
 export default function ExamNew() {
   const { wordSets, loading } = useWordSets()
-  const { firebaseUser } = useAuthStore()
+  const { firebaseUser, adminProfile } = useAuthStore()
   const navigate = useNavigate()
   const activeSets = wordSets.filter((s) => s.active)
 
@@ -40,6 +40,7 @@ export default function ExamNew() {
         name: name.trim(),
         wordSetId: selectedSetId,
         createdBy: firebaseUser.uid,
+        createdByName: adminProfile?.displayName ?? adminProfile?.email ?? '',
         createdAt: serverTimestamp(),
         durationSeconds: durationMinutes * 60,
         questionCount,

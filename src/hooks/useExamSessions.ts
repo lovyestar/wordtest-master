@@ -10,6 +10,7 @@ function mapSession(id: string, data: Record<string, unknown>): ExamSession {
     name: data.name as string,
     wordSetId: data.wordSetId as string,
     createdBy: data.createdBy as string,
+    createdByName: data.createdByName as string | undefined,
     createdAt: toMillis(data.createdAt),
     durationSeconds: data.durationSeconds as number,
     questionCount: data.questionCount as number,

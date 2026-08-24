@@ -1,9 +1,11 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { signOutUser } from '../../lib/auth'
 import { useAuthStore } from '../../store/authStore'
+import Footer from './Footer'
 
 const TABS = [
   { to: '/ranking', label: '랭킹', icon: '🏆' },
+  { to: '/word-sets', label: '단어장', icon: '📚' },
   { to: '/mock-exam', label: '단어 모의 시험', icon: '📝' },
   { to: '/word-test', label: '단어 테스트', icon: '⏱️' },
 ]
@@ -25,7 +27,7 @@ export default function AppShell() {
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-slate-900">광명고 영단어</span>
+            <span className="text-lg font-bold text-slate-900">광명고등학교 영단어 시스템</span>
           </div>
 
           <nav className="hidden items-center gap-1 md:flex">
@@ -58,8 +60,11 @@ export default function AppShell() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 pb-24 md:pb-6">
-        <Outlet />
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6 pb-24 md:pb-6">
+        <div className="flex-1">
+          <Outlet />
+        </div>
+        <Footer />
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-slate-200 bg-white/95 backdrop-blur md:hidden">

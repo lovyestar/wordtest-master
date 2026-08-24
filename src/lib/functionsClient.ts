@@ -20,3 +20,10 @@ export const submitExamAttemptFn = httpsCallable<
   { sessionId: string; answers: { entryId: string; answer: string }[] },
   SubmitResult
 >(functions, 'submitExamAttempt')
+
+export const reviewTeacherApplicationFn = httpsCallable<
+  { uid: string; approve: boolean },
+  { status: 'approved' | 'rejected' }
+>(functions, 'reviewTeacherApplication')
+
+export const removeAdminFn = httpsCallable<{ uid: string }, { removed: boolean }>(functions, 'removeAdmin')

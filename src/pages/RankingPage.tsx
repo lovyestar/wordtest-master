@@ -14,11 +14,15 @@ export default function RankingPage() {
   const selectedSetId = wordSetId || activeSets[0]?.id
 
   const { entries, loading } = useLeaderboard(dateKey, selectedSetId)
+  const selectedSet = activeSets.find((s) => s.id === selectedSetId)
 
   return (
     <div className="mx-auto max-w-lg">
       <h1 className="text-xl font-bold text-slate-900">오늘의 랭킹</h1>
-      <p className="mt-1 text-sm text-slate-500">{dateKey} · 단어 모의 시험 최고 정답률 기준</p>
+      <p className="mt-1 text-sm text-slate-500">
+        {dateKey}
+        {selectedSet && ` · ${selectedSet.name}`} · 단어 모의 시험 최고 정답률 기준
+      </p>
 
       {wordSetsLoading ? (
         <p className="mt-6 text-center text-sm text-slate-400">불러오는 중...</p>

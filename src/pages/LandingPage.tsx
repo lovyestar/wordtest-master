@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
+import Footer from '../components/layout/Footer'
 import { signInWithGoogle } from '../lib/auth'
 import { useAuthStore } from '../store/authStore'
 
@@ -23,8 +24,8 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 text-center">
-      <h1 className="text-3xl font-bold text-slate-900">광명고 영단어 시험</h1>
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 text-center">
+      <h1 className="text-3xl font-bold text-slate-900">광명고등학교 영단어 시스템</h1>
       <p className="mt-3 max-w-sm text-slate-600">
         구글 계정으로 로그인하고 랭킹, 단어 모의 시험, 단어 테스트를 이용하세요.
       </p>
@@ -44,6 +45,10 @@ export default function LandingPage() {
       <a href="/teacher/login" className="mt-10 text-xs text-slate-400 hover:text-slate-600">
         선생님이신가요? 관리자 로그인
       </a>
+
+      <div className="absolute bottom-0 left-0 right-0">
+        <Footer />
+      </div>
     </div>
   )
 }

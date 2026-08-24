@@ -1,11 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { signOutUser } from '../../lib/auth'
 import { useAuthStore } from '../../store/authStore'
+import Footer from './Footer'
 
 const TABS = [
   { to: '/teacher', label: '대시보드', end: true },
   { to: '/teacher/word-sets', label: '단어장 관리' },
   { to: '/teacher/exams', label: '시험 관리' },
+  { to: '/teacher/admins', label: '관리자 승인' },
 ]
 
 export default function TeacherShell() {
@@ -16,7 +18,7 @@ export default function TeacherShell() {
       <header className="border-b border-slate-200 bg-slate-900 text-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-6">
-            <span className="font-bold">광명고 영단어 · 관리자</span>
+            <span className="font-bold">광명고등학교 영단어 시스템 · 관리자</span>
             <nav className="flex items-center gap-1">
               {TABS.map((tab) => (
                 <NavLink
@@ -50,6 +52,7 @@ export default function TeacherShell() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         <Outlet />
       </main>
+      <Footer />
     </div>
   )
 }
