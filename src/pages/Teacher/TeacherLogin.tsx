@@ -30,7 +30,12 @@ export default function TeacherLogin() {
             <p className="mt-1 text-xs text-slate-500">승인이 완료되면 이 계정으로 관리자 페이지를 이용할 수 있어요.</p>
           </>
         ) : applicationStatus === 'rejected' ? (
-          <p className="text-sm font-semibold text-red-600">가입 신청이 거절되었습니다.</p>
+          <>
+            <p className="text-sm font-semibold text-red-600">가입 신청이 거절되었습니다.</p>
+            <a href="/teacher/signup" className="mt-1 inline-block text-xs text-indigo-500 hover:underline">
+              다시 신청하기 →
+            </a>
+          </>
         ) : applicationStatus === 'none' ? (
           <>
             <p className="text-sm font-semibold text-slate-700">아직 선생님으로 등록되지 않은 계정입니다.</p>
