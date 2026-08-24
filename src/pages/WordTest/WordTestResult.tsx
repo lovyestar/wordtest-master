@@ -33,16 +33,16 @@ export default function WordTestResult() {
   if (loading) return <p className="text-center text-sm text-slate-400">불러오는 중...</p>
   if (!data) return <p className="text-center text-sm text-slate-400">결과를 찾을 수 없습니다.</p>
 
-  const accuracyPct = Math.round(data.accuracy * 100)
+  const score = Math.round(data.accuracy * 100)
 
   return (
     <div className="mx-auto max-w-lg">
       <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
         <p className="text-sm text-slate-500">시험 종료</p>
-        <p className="mt-1 text-5xl font-extrabold text-indigo-600">{accuracyPct}%</p>
+        <p className="mt-1 text-5xl font-extrabold text-indigo-600">{score}점</p>
         <p className="mt-3 text-sm text-slate-600">
           {data.totalQuestions}문제 중 <span className="font-semibold text-emerald-600">{data.correctCount}개 정답</span>,{' '}
-          <span className="font-semibold text-red-500">{data.wrongCount}개 오답</span>
+          <span className="font-semibold text-red-500">{data.wrongCount}개 오답</span> (정답률 {score}%)
         </p>
       </div>
 

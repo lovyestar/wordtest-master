@@ -102,19 +102,20 @@ export default function ExamMonitor() {
               <th className="px-4 py-3">이름</th>
               <th className="px-4 py-3">상태</th>
               <th className="px-4 py-3">정답률</th>
+              <th className="px-4 py-3">점수</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               <tr>
-                <td className="px-4 py-6 text-center text-slate-400" colSpan={4}>
+                <td className="px-4 py-6 text-center text-slate-400" colSpan={5}>
                   불러오는 중...
                 </td>
               </tr>
             ) : attempts.length === 0 ? (
               <tr>
-                <td className="px-4 py-6 text-center text-slate-400" colSpan={4}>
+                <td className="px-4 py-6 text-center text-slate-400" colSpan={5}>
                   아직 응시자가 없습니다.
                 </td>
               </tr>
@@ -141,6 +142,9 @@ export default function ExamMonitor() {
                           ? `${Math.round(a.accuracy * 100)}% (${a.correctCount}/${a.correctCount! + a.wrongCount!})`
                           : '–'}
                       </td>
+                      <td className="px-4 py-3 font-semibold text-slate-800">
+                        {a.status === 'submitted' && a.accuracy != null ? `${Math.round(a.accuracy * 100)}점` : '–'}
+                      </td>
                       <td className="px-4 py-3 text-right">
                         {hasAnswers && (
                           <button
@@ -155,7 +159,7 @@ export default function ExamMonitor() {
                     </tr>
                     {hasAnswers && isOpen && (
                       <tr>
-                        <td colSpan={4} className="bg-slate-50 px-4 py-3">
+                        <td colSpan={5} className="bg-slate-50 px-4 py-3">
                           <div className="space-y-1">
                             {a.answers!.map((ans) => (
                               <div

@@ -1,11 +1,4 @@
-import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  updateProfile,
-} from 'firebase/auth'
+import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { auth, db } from './firebase'
 
@@ -36,27 +29,36 @@ export async function signInWithGoogle() {
   return user
 }
 
-export async function signInAdmin(email: string, password: string) {
-  const result = await signInWithEmailAndPassword(auth, email, password)
-  return result.user
-}
+// Teachers sign in with the same Google flow as students (signInWithGoogle
+// above) — this only submits the pending approval request, using whichever
+// Google account is already signed in. It also stamps the student-facing
+// profile with a "{name} 선생님" nickname and an isTeacher flag so the
+// same account can use the regular tabs without being asked for a
+// student ID (see RequireProfile).
+export async function submitTeacherApplication(name: string) {
+  const user = auth.currentUser
+  if (!user) throw new Error('로그인이 필요합니다.')
+  const trimmedName = name.trim()
 
-// Self-registers a teacher account. This does NOT grant admin access by
-// itself — it creates a `teacherApplications` doc that an existing admin
-// must approve (via the reviewTeacherApplication Cloud Function) before
-// the account can reach any /teacher route.
-export async function signUpTeacher(email: string, password: string, name: string) {
-  const result = await createUserWithEmailAndPassword(auth, email, password)
-  const user = result.user
-  await updateProfile(user, { displayName: name })
   await setDoc(doc(db, 'teacherApplications', user.uid), {
     uid: user.uid,
-    email,
-    name,
+    email: user.email ?? '',
+    name: trimmedName,
     status: 'pending',
     requestedAt: serverTimestamp(),
   })
-  return user
+
+  await setDoc(
+    doc(db, 'users', user.uid),
+    {
+      name: trimmedName,
+      displayName: `${trimmedName} 선생님`,
+      isTeacher: true,
+      email: user.email ?? '',
+      photoURL: user.photoURL ?? null,
+    },
+    { merge: true },
+  )
 }
 
 export async function signOutUser() {
