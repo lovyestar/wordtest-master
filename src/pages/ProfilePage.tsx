@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore'
 
 export default function ProfilePage() {
   const { firebaseUser, profile } = useAuthStore()
+  const isTeacher = !!profile?.isTeacher
 
   const [name, setName] = useState(profile?.name ?? '')
   const [studentId, setStudentId] = useState(profile?.studentId ?? '')
@@ -20,7 +21,13 @@ export default function ProfilePage() {
     if (!firebaseUser) return
     const trimmedName = name.trim()
     const trimmedId = studentId.trim()
-    if (!trimmedName || !trimmedId) {
+
+    if (isTeacher) {
+      if (!trimmedName) {
+        setError('이름을 입력해주세요.')
+        return
+      }
+    } else if (!trimmedName || !trimmedId) {
       setError('이름과 학번을 모두 입력해주세요.')
       return
     }
@@ -29,13 +36,13 @@ export default function ProfilePage() {
     setError(null)
     setSaved(false)
     try {
+      // Teachers keep the "{name} 선생님" nickname regardless of name
+      // edits — they never have (or need) a student ID.
       await setDoc(
         doc(db, 'users', firebaseUser.uid),
-        {
-          name: trimmedName,
-          studentId: trimmedId,
-          displayName: `${trimmedId} ${trimmedName}`,
-        },
+        isTeacher
+          ? { name: trimmedName, displayName: `${trimmedName} 선생님` }
+          : { name: trimmedName, studentId: trimmedId, displayName: `${trimmedId} ${trimmedName}` },
         { merge: true },
       )
       setSaved(true)
@@ -76,7 +83,9 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto max-w-sm">
       <h1 className="text-xl font-bold text-slate-900">내 정보 수정</h1>
-      <p className="mt-1 text-sm text-slate-500">랭킹과 시험에 표시되는 학번/이름을 변경합니다.</p>
+      <p className="mt-1 text-sm text-slate-500">
+        {isTeacher ? '랭킹과 시험에 표시되는 이름을 변경합니다.' : '랭킹과 시험에 표시되는 학번/이름을 변경합니다.'}
+      </p>
 
       <div className="mt-6 flex items-center gap-4">
         {profile?.photoURL ? (
@@ -109,12 +118,14 @@ export default function ProfilePage() {
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-3">
-        <input
-          value={studentId}
-          onChange={(e) => setStudentId(e.target.value)}
-          placeholder="학번 (예: 30512)"
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-indigo-500 focus:outline-none"
-        />
+        {!isTeacher && (
+          <input
+            value={studentId}
+            onChange={(e) => setStudentId(e.target.value)}
+            placeholder="학번 (예: 30512)"
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-indigo-500 focus:outline-none"
+          />
+        )}
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}

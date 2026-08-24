@@ -18,6 +18,7 @@ import ExamNew from './pages/Teacher/Exams/ExamNew'
 import TeacherAdmins from './pages/Teacher/TeacherAdmins'
 import TeacherDashboard from './pages/Teacher/TeacherDashboard'
 import TeacherLogin from './pages/Teacher/TeacherLogin'
+import TeacherRoster from './pages/Teacher/TeacherRoster'
 import TeacherSignup from './pages/Teacher/TeacherSignup'
 import WordSetEditor from './pages/Teacher/WordSets/WordSetEditor'
 import WordSetList from './pages/Teacher/WordSets/WordSetList'
@@ -68,6 +69,7 @@ export default function App() {
             <Route path="/teacher/exams" element={<ExamList />} />
             <Route path="/teacher/exams/new" element={<ExamNew />} />
             <Route path="/teacher/exams/:sessionId" element={<ExamMonitor />} />
+            <Route path="/teacher/teachers" element={<TeacherRoster />} />
             <Route path="/teacher/admins" element={<TeacherAdmins />} />
           </Route>
         </Route>

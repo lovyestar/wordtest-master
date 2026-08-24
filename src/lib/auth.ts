@@ -30,11 +30,11 @@ export async function signInWithGoogle() {
 }
 
 // Teachers sign in with the same Google flow as students (signInWithGoogle
-// above) — this only submits the pending approval request, using whichever
-// Google account is already signed in. It also stamps the student-facing
-// profile with a "{name} 선생님" nickname and an isTeacher flag so the
-// same account can use the regular tabs without being asked for a
-// student ID (see RequireProfile).
+// above) — this only files the pending approval request. The "{name} 선생님"
+// student-facing nickname is granted later, only once an admin actually
+// approves the request (see reviewTeacherApplication) — never at
+// application time, so a pending/rejected applicant never shows as a
+// teacher anywhere.
 export async function submitTeacherApplication(name: string) {
   const user = auth.currentUser
   if (!user) throw new Error('로그인이 필요합니다.')
@@ -47,18 +47,6 @@ export async function submitTeacherApplication(name: string) {
     status: 'pending',
     requestedAt: serverTimestamp(),
   })
-
-  await setDoc(
-    doc(db, 'users', user.uid),
-    {
-      name: trimmedName,
-      displayName: `${trimmedName} 선생님`,
-      isTeacher: true,
-      email: user.email ?? '',
-      photoURL: user.photoURL ?? null,
-    },
-    { merge: true },
-  )
 }
 
 export async function signOutUser() {
