@@ -14,7 +14,7 @@ const MODE_OPTIONS: { value: ExamSessionMode; label: string }[] = [
 
 export default function ExamNew() {
   const { wordSets, loading } = useWordSets()
-  const { firebaseUser, adminProfile } = useAuthStore()
+  const { firebaseUser, profile, adminProfile } = useAuthStore()
   const navigate = useNavigate()
   const activeSets = wordSets.filter((s) => s.active)
 
@@ -40,7 +40,10 @@ export default function ExamNew() {
         name: name.trim(),
         wordSetId: selectedSetId,
         createdBy: firebaseUser.uid,
-        createdByName: adminProfile?.displayName ?? adminProfile?.email ?? '',
+        // Prefer the student-facing profile name — it's already correctly
+        // formatted per role ("{name} 선생님" for teachers, plain for the
+        // super-admin) — falling back to the admin record if that's missing.
+        createdByName: profile?.displayName ?? adminProfile?.displayName ?? adminProfile?.email ?? '',
         createdAt: serverTimestamp(),
         durationSeconds: durationMinutes * 60,
         questionCount,

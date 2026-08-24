@@ -1,4 +1,4 @@
-import { doc, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { collection, deleteDoc, doc, getDocs, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { Fragment, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useExamAttempts } from '../../../hooks/useExamAttempts'
@@ -29,6 +29,7 @@ export default function ExamMonitor() {
   const [session, setSession] = useState<ExamSession | null>(null)
   const { attempts, loading } = useExamAttempts(sessionId)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [resettingUid, setResettingUid] = useState<string | null>(null)
 
   useEffect(() => {
     if (!sessionId) return
@@ -52,6 +53,20 @@ export default function ExamMonitor() {
   async function closeSession() {
     if (!sessionId) return
     await updateDoc(doc(db, 'examSessions', sessionId), { status: 'closed', closedAt: serverTimestamp() })
+  }
+
+  async function handleRetake(uid: string, studentName: string) {
+    if (!sessionId) return
+    if (!window.confirm(`"${studentName}" 학생의 이전 응시 기록을 삭제하고 재시험을 허용할까요?`)) return
+    setResettingUid(uid)
+    try {
+      const attemptPath = `examSessions/${sessionId}/attempts/${uid}`
+      const violationsSnap = await getDocs(collection(db, attemptPath, 'violations'))
+      await Promise.all(violationsSnap.docs.map((v) => deleteDoc(v.ref)))
+      await deleteDoc(doc(db, attemptPath))
+    } finally {
+      setResettingUid(null)
+    }
   }
 
   function toggleExpanded(uid: string) {
@@ -146,6 +161,16 @@ export default function ExamMonitor() {
                         {a.status === 'submitted' && a.accuracy != null ? `${Math.round(a.accuracy * 100)}점` : '–'}
                       </td>
                       <td className="px-4 py-3 text-right">
+                        {a.status !== 'in_progress' && (
+                          <button
+                            type="button"
+                            onClick={() => handleRetake(a.uid, a.studentName)}
+                            disabled={resettingUid === a.uid}
+                            className="mr-3 text-xs text-amber-600 hover:text-amber-700 disabled:opacity-50"
+                          >
+                            {resettingUid === a.uid ? '초기화 중...' : '재시험 허용'}
+                          </button>
+                        )}
                         {hasAnswers && (
                           <button
                             type="button"
