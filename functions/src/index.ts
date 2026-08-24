@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase-admin/app'
+import { getAuth } from 'firebase-admin/auth'
 import { FieldValue, getFirestore } from 'firebase-admin/firestore'
 import { HttpsError, onCall } from 'firebase-functions/v2/https'
 import { setGlobalOptions } from 'firebase-functions/v2'
@@ -233,8 +234,8 @@ export const reviewTeacherApplication = onCall<ReviewTeacherApplicationPayload>(
   if (!reviewerUid) throw new HttpsError('unauthenticated', '로그인이 필요합니다.')
 
   const reviewerSnap = await db.doc(`admins/${reviewerUid}`).get()
-  if (!reviewerSnap.exists) {
-    throw new HttpsError('permission-denied', '관리자만 승인/거절할 수 있습니다.')
+  if (!reviewerSnap.exists || reviewerSnap.data()?.role !== 'admin') {
+    throw new HttpsError('permission-denied', '최고 관리자만 승인/거절할 수 있습니다.')
   }
 
   const { uid, approve } = request.data ?? {}
@@ -266,6 +267,11 @@ export const reviewTeacherApplication = onCall<ReviewTeacherApplicationPayload>(
       createdAt: FieldValue.serverTimestamp(),
       createdBy: reviewerUid,
     })
+  } else {
+    // Reject: fully remove the self-registered Auth account too, so the
+    // email is free to sign up again (otherwise createUserWithEmailAndPassword
+    // would fail with auth/email-already-in-use on a retry).
+    await getAuth().deleteUser(uid).catch(() => {})
   }
 
   return { status: approve ? 'approved' : 'rejected' }
@@ -280,8 +286,8 @@ export const removeAdmin = onCall<{ uid: string }>(async (request) => {
   if (!callerUid) throw new HttpsError('unauthenticated', '로그인이 필요합니다.')
 
   const callerSnap = await db.doc(`admins/${callerUid}`).get()
-  if (!callerSnap.exists) {
-    throw new HttpsError('permission-denied', '관리자만 삭제할 수 있습니다.')
+  if (!callerSnap.exists || callerSnap.data()?.role !== 'admin') {
+    throw new HttpsError('permission-denied', '최고 관리자만 삭제할 수 있습니다.')
   }
 
   const { uid } = request.data ?? {}
@@ -290,6 +296,10 @@ export const removeAdmin = onCall<{ uid: string }>(async (request) => {
     throw new HttpsError('failed-precondition', '본인 계정은 삭제할 수 없습니다.')
   }
 
+  // Remove both the admin grant and the underlying Auth account — otherwise
+  // the email stays "taken" and a fresh signUpTeacher() retry would fail
+  // with auth/email-already-in-use.
   await db.doc(`admins/${uid}`).delete()
+  await getAuth().deleteUser(uid).catch(() => {})
   return { removed: true }
 })

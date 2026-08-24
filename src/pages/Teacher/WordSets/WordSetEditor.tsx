@@ -159,7 +159,10 @@ export default function WordSetEditor() {
               </button>
             </h1>
           )}
-          <p className="mt-1 text-sm text-slate-500">{entries.length}개 단어</p>
+          <p className="mt-1 text-sm text-slate-500">
+            {entries.length}개 단어
+            {set?.createdByName && ` · 만든 사람: ${set.createdByName}선생님`}
+          </p>
         </div>
         {set && (
           <button

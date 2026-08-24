@@ -44,6 +44,9 @@ export default function TeacherLogin() {
         >
           다른 계정으로 로그인
         </button>
+        <a href="/" className="mt-4 block text-xs text-slate-400 hover:text-slate-600">
+          ← 일반 로그인으로 돌아가기
+        </a>
       </div>
     )
   }
@@ -63,6 +66,9 @@ export default function TeacherLogin() {
 
   return (
     <div className="mx-auto mt-24 max-w-sm">
+      <a href="/" className="mb-4 block text-xs text-slate-400 hover:text-slate-600">
+        ← 일반 로그인으로 돌아가기
+      </a>
       <h1 className="text-center text-xl font-bold text-slate-900">관리자 로그인</h1>
       <form onSubmit={handleSubmit} className="mt-6 space-y-3">
         <input
