@@ -26,7 +26,7 @@ export default function TeacherLogin() {
       <div className="mx-auto mt-24 max-w-sm text-center">
         {applicationStatus === 'pending' ? (
           <>
-            <p className="text-sm font-semibold text-amber-600">관리자 승인 대기 중입니다.</p>
+            <p className="text-sm font-semibold text-amber-600">선생님 등록 승인 대기 중입니다.</p>
             <p className="mt-1 text-xs text-slate-500">승인이 완료되면 이 계정으로 관리자 페이지를 이용할 수 있어요.</p>
           </>
         ) : applicationStatus === 'rejected' ? (

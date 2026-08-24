@@ -15,7 +15,10 @@ const BASE_TABS: TeacherTab[] = [
   { to: '/teacher/exams', label: '시험 관리' },
   { to: '/teacher/teachers', label: '선생님' },
 ]
-const SUPER_ADMIN_TABS: TeacherTab[] = [{ to: '/teacher/admins', label: '관리자' }]
+const SUPER_ADMIN_TABS: TeacherTab[] = [
+  { to: '/teacher/applications', label: '선생님 신청' },
+  { to: '/teacher/admins', label: '관리자' },
+]
 
 export default function TeacherShell() {
   const { adminProfile } = useAuthStore()
