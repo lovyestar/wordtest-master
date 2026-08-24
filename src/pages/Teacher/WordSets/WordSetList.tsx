@@ -7,7 +7,7 @@ import { useAuthStore } from '../../../store/authStore'
 
 export default function WordSetList() {
   const { wordSets, loading } = useWordSets()
-  const { firebaseUser } = useAuthStore()
+  const { firebaseUser, adminProfile } = useAuthStore()
   const navigate = useNavigate()
 
   const [creating, setCreating] = useState(false)
@@ -24,6 +24,7 @@ export default function WordSetList() {
         active: true,
         wordCount: 0,
         createdBy: firebaseUser.uid,
+        createdByName: adminProfile?.displayName ?? adminProfile?.email ?? '',
         createdAt: serverTimestamp(),
       })
       navigate(`/teacher/word-sets/${ref.id}`)
@@ -81,6 +82,7 @@ export default function WordSetList() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-400">
             <tr>
               <th className="px-4 py-3">이름</th>
+              <th className="px-4 py-3">만든 사람</th>
               <th className="px-4 py-3">단어 수</th>
               <th className="px-4 py-3">상태</th>
               <th className="px-4 py-3" />
@@ -89,7 +91,7 @@ export default function WordSetList() {
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               <tr>
-                <td className="px-4 py-6 text-center text-slate-400" colSpan={4}>
+                <td className="px-4 py-6 text-center text-slate-400" colSpan={5}>
                   불러오는 중...
                 </td>
               </tr>
@@ -104,6 +106,7 @@ export default function WordSetList() {
                       <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">기본</span>
                     )}
                   </td>
+                  <td className="px-4 py-3 text-slate-500">{set.createdByName ? `${set.createdByName}선생님` : '-'}</td>
                   <td className="px-4 py-3 text-slate-600">{set.wordCount}</td>
                   <td className="px-4 py-3">
                     <button

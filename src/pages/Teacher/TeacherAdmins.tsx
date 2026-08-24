@@ -1,5 +1,6 @@
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { db } from '../../lib/firebase'
 import { toMillis } from '../../lib/firestoreUtils'
 import { removeAdminFn, reviewTeacherApplicationFn } from '../../lib/functionsClient'
@@ -7,7 +8,7 @@ import { useAuthStore } from '../../store/authStore'
 import type { AdminProfile, TeacherApplication } from '../../types'
 
 export default function TeacherAdmins() {
-  const { firebaseUser } = useAuthStore()
+  const { firebaseUser, adminProfile } = useAuthStore()
   const [applications, setApplications] = useState<TeacherApplication[]>([])
   const [admins, setAdmins] = useState<AdminProfile[]>([])
   const [processingUid, setProcessingUid] = useState<string | null>(null)
@@ -59,8 +60,9 @@ export default function TeacherAdmins() {
     }
   }
 
+  if (adminProfile && adminProfile.role !== 'admin') return <Navigate to="/teacher" replace />
+
   const pending = applications.filter((a) => a.status === 'pending')
-  const reviewed = applications.filter((a) => a.status !== 'pending')
 
   return (
     <div>
@@ -131,27 +133,6 @@ export default function TeacherAdmins() {
           ))}
         </ul>
       </section>
-
-      {reviewed.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-sm font-semibold text-slate-700">처리된 신청</h2>
-          <ul className="mt-2 space-y-2">
-            {reviewed.map((app) => (
-              <li
-                key={app.uid}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm"
-              >
-                <span>
-                  {app.name} <span className="text-xs text-slate-400">({app.email})</span>
-                </span>
-                <span className={app.status === 'approved' ? 'text-xs text-emerald-600' : 'text-xs text-red-500'}>
-                  {app.status === 'approved' ? '승인됨' : '거절됨'}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
     </div>
   )
 }

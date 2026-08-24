@@ -26,7 +26,11 @@ export default function WordSetBrowseList() {
                   <span className="font-semibold text-slate-900">{set.name}</span>
                   <span className="text-xs text-slate-400">{set.wordCount}단어</span>
                 </div>
-                {set.description && <p className="mt-1 text-xs text-slate-500">{set.description}</p>}
+                <p className="mt-1 text-xs text-slate-500">
+                  {set.description}
+                  {set.description && set.createdByName && ' · '}
+                  {set.createdByName && `만든 사람: ${set.createdByName}선생님`}
+                </p>
               </Link>
             </li>
           ))}

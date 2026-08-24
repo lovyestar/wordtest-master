@@ -19,6 +19,7 @@ export interface WordSet {
   active: boolean
   wordCount: number
   createdBy: string
+  createdByName?: string
   createdAt: number
 }
 

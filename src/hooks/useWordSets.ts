@@ -22,6 +22,7 @@ export function useWordSets() {
             active: data.active !== false,
             wordCount: data.wordCount ?? 0,
             createdBy: data.createdBy,
+            createdByName: data.createdByName,
             createdAt: toMillis(data.createdAt),
           } satisfies WordSet
         }),
