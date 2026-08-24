@@ -15,10 +15,14 @@ import RankingPage from './pages/RankingPage'
 import ExamList from './pages/Teacher/Exams/ExamList'
 import ExamMonitor from './pages/Teacher/Exams/ExamMonitor'
 import ExamNew from './pages/Teacher/Exams/ExamNew'
+import TeacherAdmins from './pages/Teacher/TeacherAdmins'
 import TeacherDashboard from './pages/Teacher/TeacherDashboard'
 import TeacherLogin from './pages/Teacher/TeacherLogin'
+import TeacherSignup from './pages/Teacher/TeacherSignup'
 import WordSetEditor from './pages/Teacher/WordSets/WordSetEditor'
 import WordSetList from './pages/Teacher/WordSets/WordSetList'
+import WordSetBrowseDetail from './pages/WordSets/WordSetBrowseDetail'
+import WordSetBrowseList from './pages/WordSets/WordSetBrowseList'
 import WordTestList from './pages/WordTest/WordTestList'
 import WordTestResult from './pages/WordTest/WordTestResult'
 import WordTestRun from './pages/WordTest/WordTestRun'
@@ -42,6 +46,8 @@ export default function App() {
               <Route path="/mock-exam/run" element={<MockExamRun />} />
               <Route path="/mock-exam/result/:attemptId" element={<MockExamResult />} />
               <Route path="/word-test" element={<WordTestList />} />
+              <Route path="/word-sets" element={<WordSetBrowseList />} />
+              <Route path="/word-sets/:setId" element={<WordSetBrowseDetail />} />
               <Route path="/profile" element={<ProfilePage />} />
             </Route>
 
@@ -53,6 +59,7 @@ export default function App() {
         </Route>
 
         <Route path="/teacher/login" element={<TeacherLogin />} />
+        <Route path="/teacher/signup" element={<TeacherSignup />} />
         <Route element={<RequireAdmin />}>
           <Route element={<TeacherShell />}>
             <Route path="/teacher" element={<TeacherDashboard />} />
@@ -61,6 +68,7 @@ export default function App() {
             <Route path="/teacher/exams" element={<ExamList />} />
             <Route path="/teacher/exams/new" element={<ExamNew />} />
             <Route path="/teacher/exams/:sessionId" element={<ExamMonitor />} />
+            <Route path="/teacher/admins" element={<TeacherAdmins />} />
           </Route>
         </Route>
 

@@ -39,6 +39,18 @@ export interface AdminProfile {
   role: 'admin' | 'teacher'
 }
 
+export type TeacherApplicationStatus = 'pending' | 'approved' | 'rejected'
+
+export interface TeacherApplication {
+  uid: string
+  email: string
+  name: string
+  status: TeacherApplicationStatus
+  requestedAt: number
+  reviewedAt?: number
+  reviewedBy?: string
+}
+
 export interface MockExamQuestion {
   entryId: string
   word: string
@@ -88,6 +100,7 @@ export interface ExamSession {
   wordSetId: string
   wordSetName?: string
   createdBy: string
+  createdByName?: string
   createdAt: number
   durationSeconds: number
   questionCount: number
