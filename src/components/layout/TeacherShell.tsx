@@ -3,15 +3,22 @@ import { signOutUser } from '../../lib/auth'
 import { useAuthStore } from '../../store/authStore'
 import Footer from './Footer'
 
-const TABS = [
+interface TeacherTab {
+  to: string
+  label: string
+  end?: boolean
+}
+
+const BASE_TABS: TeacherTab[] = [
   { to: '/teacher', label: '대시보드', end: true },
   { to: '/teacher/word-sets', label: '단어장 관리' },
   { to: '/teacher/exams', label: '시험 관리' },
-  { to: '/teacher/admins', label: '관리자 승인' },
 ]
+const SUPER_ADMIN_TABS: TeacherTab[] = [{ to: '/teacher/admins', label: '관리자 승인' }]
 
 export default function TeacherShell() {
   const { adminProfile } = useAuthStore()
+  const tabs = adminProfile?.role === 'admin' ? [...BASE_TABS, ...SUPER_ADMIN_TABS] : BASE_TABS
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -20,7 +27,7 @@ export default function TeacherShell() {
           <div className="flex items-center gap-6">
             <span className="font-bold">광명고등학교 영단어 시스템 · 관리자</span>
             <nav className="flex items-center gap-1">
-              {TABS.map((tab) => (
+              {tabs.map((tab) => (
                 <NavLink
                   key={tab.to}
                   to={tab.to}
