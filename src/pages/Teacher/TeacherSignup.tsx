@@ -54,17 +54,14 @@ export default function TeacherSignup() {
     }
   }
 
-  if (!loading && firebaseUser && applicationStatus && applicationStatus !== 'none') {
+  // Only an already-pending request blocks a new submission — a rejected
+  // applicant can simply apply again (resubmitting resets status to
+  // 'pending' since the application doc is keyed by their uid).
+  if (!loading && firebaseUser && applicationStatus === 'pending') {
     return (
       <div className="mx-auto mt-24 max-w-sm text-center">
-        {applicationStatus === 'pending' ? (
-          <>
-            <p className="text-sm font-semibold text-amber-600">이미 승인 대기 중인 신청이 있습니다.</p>
-            <p className="mt-1 text-xs text-slate-500">승인이 완료되면 관리자 페이지를 이용할 수 있어요.</p>
-          </>
-        ) : (
-          <p className="text-sm font-semibold text-red-600">가입 신청이 거절되었습니다.</p>
-        )}
+        <p className="text-sm font-semibold text-amber-600">이미 승인 대기 중인 신청이 있습니다.</p>
+        <p className="mt-1 text-xs text-slate-500">승인이 완료되면 관리자 페이지를 이용할 수 있어요.</p>
       </div>
     )
   }
