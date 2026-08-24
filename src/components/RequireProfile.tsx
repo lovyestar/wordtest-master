@@ -6,7 +6,8 @@ export default function RequireProfile() {
   const { profile, profileLoading } = useAuthStore()
 
   if (profileLoading) return <FullScreenSpinner />
-  if (!profile?.studentId || !profile.name) return <Navigate to="/welcome" replace />
+  const complete = !!profile?.name && (!!profile.studentId || !!profile.isTeacher)
+  if (!complete) return <Navigate to="/welcome" replace />
 
   return <Outlet />
 }
