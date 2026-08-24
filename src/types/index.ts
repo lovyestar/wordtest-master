@@ -28,6 +28,7 @@ export interface UserProfile {
   displayName?: string
   name?: string
   studentId?: string
+  isTeacher?: boolean
   email: string
   photoURL?: string
   firstPlaceCount?: number

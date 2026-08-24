@@ -1,5 +1,4 @@
 import { initializeApp } from 'firebase-admin/app'
-import { getAuth } from 'firebase-admin/auth'
 import { FieldValue, getFirestore } from 'firebase-admin/firestore'
 import { HttpsError, onCall } from 'firebase-functions/v2/https'
 import { setGlobalOptions } from 'firebase-functions/v2'
@@ -267,12 +266,10 @@ export const reviewTeacherApplication = onCall<ReviewTeacherApplicationPayload>(
       createdAt: FieldValue.serverTimestamp(),
       createdBy: reviewerUid,
     })
-  } else {
-    // Reject: fully remove the self-registered Auth account too, so the
-    // email is free to sign up again (otherwise createUserWithEmailAndPassword
-    // would fail with auth/email-already-in-use on a retry).
-    await getAuth().deleteUser(uid).catch(() => {})
   }
+  // Reject: leave the applicant's Auth account and `users/{uid}` profile
+  // alone. Teachers sign in with the same Google account as students, so
+  // deleting it would destroy any real student history tied to that uid.
 
   return { status: approve ? 'approved' : 'rejected' }
 })
@@ -296,10 +293,9 @@ export const removeAdmin = onCall<{ uid: string }>(async (request) => {
     throw new HttpsError('failed-precondition', '본인 계정은 삭제할 수 없습니다.')
   }
 
-  // Remove both the admin grant and the underlying Auth account — otherwise
-  // the email stays "taken" and a fresh signUpTeacher() retry would fail
-  // with auth/email-already-in-use.
+  // Only revoke the admin grant — the Auth account and `users/{uid}`
+  // profile stay intact since teachers sign in with the same Google
+  // account as students (deleting it would destroy real student history).
   await db.doc(`admins/${uid}`).delete()
-  await getAuth().deleteUser(uid).catch(() => {})
   return { removed: true }
 })
