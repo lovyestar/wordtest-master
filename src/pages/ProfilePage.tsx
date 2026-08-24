@@ -5,8 +5,11 @@ import { db, storage } from '../lib/firebase'
 import { useAuthStore } from '../store/authStore'
 
 export default function ProfilePage() {
-  const { firebaseUser, profile } = useAuthStore()
+  const { firebaseUser, profile, adminProfile } = useAuthStore()
   const isTeacher = !!profile?.isTeacher
+  // Admins are staff too (no student ID needed) but aren't "선생님" —
+  // that title is reserved for role:'teacher' accounts.
+  const isSuperAdmin = adminProfile?.role === 'admin'
 
   const [name, setName] = useState(profile?.name ?? '')
   const [studentId, setStudentId] = useState(profile?.studentId ?? '')
@@ -37,11 +40,12 @@ export default function ProfilePage() {
     setSaved(false)
     try {
       // Teachers keep the "{name} 선생님" nickname regardless of name
-      // edits — they never have (or need) a student ID.
+      // edits — they never have (or need) a student ID. Super-admins are
+      // staff too but never get the 선생님 title.
       await setDoc(
         doc(db, 'users', firebaseUser.uid),
         isTeacher
-          ? { name: trimmedName, displayName: `${trimmedName} 선생님` }
+          ? { name: trimmedName, displayName: isSuperAdmin ? trimmedName : `${trimmedName} 선생님` }
           : { name: trimmedName, studentId: trimmedId, displayName: `${trimmedId} ${trimmedName}` },
         { merge: true },
       )
