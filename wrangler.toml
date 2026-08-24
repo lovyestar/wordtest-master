@@ -1,0 +1,10 @@
+name = "kmhswords"
+compatibility_date = "2026-08-01"
+
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+
+[[routes]]
+pattern = "kmhswords.yestar.dev"
+custom_domain = true
