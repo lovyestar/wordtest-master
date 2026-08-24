@@ -29,7 +29,7 @@ export default function WordSetBrowseList() {
                 <p className="mt-1 text-xs text-slate-500">
                   {set.description}
                   {set.description && set.createdByName && ' · '}
-                  {set.createdByName && `만든 사람: ${set.createdByName} 선생님`}
+                  {set.createdByName && `만든 사람: ${set.createdByName}`}
                 </p>
               </Link>
             </li>

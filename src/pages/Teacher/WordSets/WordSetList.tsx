@@ -7,7 +7,7 @@ import { useAuthStore } from '../../../store/authStore'
 
 export default function WordSetList() {
   const { wordSets, loading } = useWordSets()
-  const { firebaseUser, adminProfile } = useAuthStore()
+  const { firebaseUser, profile, adminProfile } = useAuthStore()
   const navigate = useNavigate()
 
   const [creating, setCreating] = useState(false)
@@ -24,7 +24,7 @@ export default function WordSetList() {
         active: true,
         wordCount: 0,
         createdBy: firebaseUser.uid,
-        createdByName: adminProfile?.displayName ?? adminProfile?.email ?? '',
+        createdByName: profile?.displayName ?? adminProfile?.displayName ?? adminProfile?.email ?? '',
         createdAt: serverTimestamp(),
       })
       navigate(`/teacher/word-sets/${ref.id}`)
@@ -106,7 +106,7 @@ export default function WordSetList() {
                       <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">기본</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-500">{set.createdByName ? `${set.createdByName} 선생님` : '-'}</td>
+                  <td className="px-4 py-3 text-slate-500">{set.createdByName || '-'}</td>
                   <td className="px-4 py-3 text-slate-600">{set.wordCount}</td>
                   <td className="px-4 py-3">
                     <button

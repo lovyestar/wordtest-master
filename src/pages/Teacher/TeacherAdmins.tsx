@@ -44,9 +44,7 @@ export default function TeacherAdmins() {
             className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm"
           >
             <span>
-              <span className="font-medium text-slate-800">
-                {admin.displayName ? `${admin.displayName} 선생님` : '이름 없음'}
-              </span>
+              <span className="font-medium text-slate-800">{admin.displayName ?? '이름 없음'}</span>
               <span className="ml-2 text-xs text-slate-400">{admin.email}</span>
             </span>
             {admin.uid !== firebaseUser?.uid && (
