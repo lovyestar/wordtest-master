@@ -55,7 +55,7 @@ export default function OnboardingPage() {
         <input
           value={studentId}
           onChange={(e) => setStudentId(e.target.value)}
-          placeholder="학번 (예: 30512)"
+          placeholder="학번 (예: 3051)"
           className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-indigo-500 focus:outline-none"
         />
         <input
