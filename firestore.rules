@@ -93,7 +93,10 @@ service cloud.firestore {
         match /violations/{violationId} {
           allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
           allow create: if isSignedIn() && request.auth.uid == uid;
-          allow update, delete: if false;
+          allow update: if false;
+          // Students can never touch this append-only evidence log, but an
+          // admin needs to clear it when resetting an attempt for a retake.
+          allow delete: if isAdmin();
         }
       }
     }
