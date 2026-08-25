@@ -9,7 +9,7 @@ export default function WordStudyList() {
     <div className="mx-auto max-w-lg">
       <h1 className="text-xl font-bold text-slate-900">단어 외우기</h1>
       <p className="mt-1 text-sm text-slate-500">
-        단어를 하나씩 넘기며 답을 입력하면 바로 정답 여부를 알려줘요. 랭킹에는 반영되지 않아요.
+        단어를 하나씩 넘기며 단어를 외워봐요.
       </p>
 
       {loading ? (
