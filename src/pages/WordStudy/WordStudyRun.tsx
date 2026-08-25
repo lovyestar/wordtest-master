@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useWordSetEntries } from '../../hooks/useWordSetEntries'
 import { useWordSets } from '../../hooks/useWordSets'
 import { isCorrectAnswer } from '../../lib/clientGrading'
-import { shuffle } from '../../lib/quiz'
+import { DEFAULT_MOCK_EXAM_QUESTION_COUNT, QUESTION_COUNT_OPTIONS, sampleQuestions } from '../../lib/quiz'
 import type { ExamMode, WordEntry } from '../../types'
 
 const MODE_OPTIONS: { value: ExamMode; label: string }[] = [
@@ -18,6 +18,7 @@ export default function WordStudyRun() {
   const set = wordSets.find((s) => s.id === setId)
 
   const [mode, setMode] = useState<ExamMode>('en2ko')
+  const [questionCount, setQuestionCount] = useState(DEFAULT_MOCK_EXAM_QUESTION_COUNT)
   const [queue, setQueue] = useState<WordEntry[] | null>(null)
   const [index, setIndex] = useState(0)
   const [answer, setAnswer] = useState('')
@@ -25,8 +26,11 @@ export default function WordStudyRun() {
   const [checked, setChecked] = useState<{ correct: boolean } | null>(null)
   const [correctCount, setCorrectCount] = useState(0)
 
+  const availableCountOptions = QUESTION_COUNT_OPTIONS.filter((n) => n <= entries.length || n === Infinity)
+  const effectiveCount = Math.min(questionCount, entries.length)
+
   function handleStart() {
-    setQueue(shuffle(entries))
+    setQueue(sampleQuestions(entries, effectiveCount))
     setIndex(0)
     setCorrectCount(0)
     setChecked(null)
@@ -62,6 +66,18 @@ export default function WordStudyRun() {
     setIndex((i) => i + 1)
   }
 
+  // Once feedback is showing, Enter advances to the next card — the input
+  // is gone at that point so the form's own onSubmit can't catch it.
+  useEffect(() => {
+    if (!checked) return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Enter') handleNext()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checked])
+
   if (!setId) return null
 
   if (!queue) {
@@ -94,6 +110,26 @@ export default function WordStudyRun() {
                   onChange={() => setMode(opt.value)}
                 />
               </label>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-6">
+          <h2 className="text-sm font-semibold text-slate-700">문제 수</h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {availableCountOptions.map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setQuestionCount(n)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                  effectiveCount === Math.min(n, entries.length)
+                    ? 'bg-indigo-600 text-white'
+                    : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                }`}
+              >
+                {n === Infinity ? `전체 (${entries.length})` : `${n}개`}
+              </button>
             ))}
           </div>
         </section>
