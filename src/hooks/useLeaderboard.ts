@@ -21,21 +21,23 @@ export function useLeaderboard(dateKey: string, wordSetId: string | null | undef
       limit(100),
     )
     const unsub = onSnapshot(q, (snap) => {
-      setEntries(
-        snap.docs.map((d) => {
-          const data = d.data()
-          return {
-            uid: data.uid,
-            displayName: data.displayName,
-            photoURL: data.photoURL ?? undefined,
-            bestAccuracy: data.bestAccuracy,
-            correctCount: data.correctCount,
-            wrongCount: data.wrongCount,
-            totalQuestions: data.totalQuestions,
-            updatedAt: toMillis(data.updatedAt),
-          } satisfies LeaderboardEntry
-        }),
-      )
+      const mapped = snap.docs.map((d) => {
+        const data = d.data()
+        return {
+          uid: data.uid,
+          displayName: data.displayName,
+          photoURL: data.photoURL ?? undefined,
+          bestAccuracy: data.bestAccuracy,
+          correctCount: data.correctCount,
+          wrongCount: data.wrongCount,
+          totalQuestions: data.totalQuestions,
+          updatedAt: toMillis(data.updatedAt),
+        } satisfies LeaderboardEntry
+      })
+      // Same accuracy → whoever answered more questions correctly ranks
+      // higher (Firestore only sorts by bestAccuracy server-side).
+      mapped.sort((a, b) => b.bestAccuracy - a.bestAccuracy || b.correctCount - a.correctCount)
+      setEntries(mapped)
       setLoading(false)
     })
     return unsub

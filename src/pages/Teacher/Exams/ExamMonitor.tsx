@@ -64,6 +64,8 @@ export default function ExamMonitor() {
       const violationsSnap = await getDocs(collection(db, attemptPath, 'violations'))
       await Promise.all(violationsSnap.docs.map((v) => deleteDoc(v.ref)))
       await deleteDoc(doc(db, attemptPath))
+    } catch {
+      window.alert('재시험 초기화에 실패했습니다. 다시 시도해주세요.')
     } finally {
       setResettingUid(null)
     }
