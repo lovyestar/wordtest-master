@@ -26,21 +26,25 @@ export default function AppShell() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-slate-900">광명고등학교 영단어 시스템</span>
+            <span className="whitespace-nowrap text-lg font-bold text-slate-900">광명고등학교 영단어 시스템</span>
           </div>
 
           <nav className="hidden items-center gap-1 md:flex">
             {TABS.map((tab) => (
-              <NavLink key={tab.to} to={tab.to} className={({ isActive }) => tabClass(isActive)}>
+              <NavLink
+                key={tab.to}
+                to={tab.to}
+                className={({ isActive }) => `${tabClass(isActive)} whitespace-nowrap`}
+              >
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
               </NavLink>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             {profile?.photoURL && (
               <img src={profile.photoURL} alt="" className="h-8 w-8 rounded-full" referrerPolicy="no-referrer" />
             )}
@@ -53,7 +57,7 @@ export default function AppShell() {
             <button
               type="button"
               onClick={() => signOutUser()}
-              className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+              className="whitespace-nowrap rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
             >
               로그아웃
             </button>

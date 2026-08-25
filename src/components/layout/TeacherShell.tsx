@@ -27,9 +27,9 @@ export default function TeacherShell() {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-slate-900 text-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-6">
-            <span className="font-bold">광명고등학교 영단어 시스템 · 관리자</span>
+            <span className="whitespace-nowrap font-bold">광명고등학교 영단어 시스템 · 관리자</span>
             <nav className="flex items-center gap-1">
               {tabs.map((tab) => (
                 <NavLink
@@ -37,7 +37,7 @@ export default function TeacherShell() {
                   to={tab.to}
                   end={tab.end}
                   className={({ isActive }) =>
-                    `rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                    `whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition ${
                       isActive ? 'bg-white text-slate-900' : 'text-slate-300 hover:bg-slate-800'
                     }`
                   }
@@ -47,12 +47,12 @@ export default function TeacherShell() {
               ))}
             </nav>
           </div>
-          <div className="flex items-center gap-3 text-sm text-slate-300">
-            <span>{adminProfile?.email}</span>
+          <div className="flex shrink-0 items-center gap-3 text-sm text-slate-300">
+            <span className="whitespace-nowrap">{adminProfile?.email}</span>
             <button
               type="button"
               onClick={() => signOutUser()}
-              className="rounded-full border border-slate-600 px-3 py-1.5 text-xs hover:bg-slate-800"
+              className="whitespace-nowrap rounded-full border border-slate-600 px-3 py-1.5 text-xs hover:bg-slate-800"
             >
               로그아웃
             </button>
