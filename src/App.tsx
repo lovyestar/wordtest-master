@@ -25,6 +25,8 @@ import WordSetEditor from './pages/Teacher/WordSets/WordSetEditor'
 import WordSetList from './pages/Teacher/WordSets/WordSetList'
 import WordSetBrowseDetail from './pages/WordSets/WordSetBrowseDetail'
 import WordSetBrowseList from './pages/WordSets/WordSetBrowseList'
+import WordStudyList from './pages/WordStudy/WordStudyList'
+import WordStudyRun from './pages/WordStudy/WordStudyRun'
 import WordTestList from './pages/WordTest/WordTestList'
 import WordTestResult from './pages/WordTest/WordTestResult'
 import WordTestRun from './pages/WordTest/WordTestRun'
@@ -50,6 +52,8 @@ export default function App() {
               <Route path="/word-test" element={<WordTestList />} />
               <Route path="/word-sets" element={<WordSetBrowseList />} />
               <Route path="/word-sets/:setId" element={<WordSetBrowseDetail />} />
+              <Route path="/word-study" element={<WordStudyList />} />
+              <Route path="/word-study/:setId" element={<WordStudyRun />} />
               <Route path="/profile" element={<ProfilePage />} />
             </Route>
 

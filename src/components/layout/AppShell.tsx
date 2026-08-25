@@ -6,6 +6,7 @@ import Footer from './Footer'
 const TABS = [
   { to: '/ranking', label: '랭킹', icon: '🏆' },
   { to: '/word-sets', label: '단어장', icon: '📚' },
+  { to: '/word-study', label: '단어 외우기', icon: '🧠' },
   { to: '/mock-exam', label: '단어 모의 시험', icon: '📝' },
   { to: '/word-test', label: '단어 테스트', icon: '⏱️' },
 ]
