@@ -2,6 +2,7 @@ import { collection, deleteDoc, doc, getDocs, onSnapshot, serverTimestamp, updat
 import { Fragment, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useExamAttempts } from '../../../hooks/useExamAttempts'
+import { useWordSets } from '../../../hooks/useWordSets'
 import { exportExamResultsToExcel } from '../../../lib/examExport'
 import { db } from '../../../lib/firebase'
 import { toMillis } from '../../../lib/firestoreUtils'
@@ -30,6 +31,8 @@ export default function ExamMonitor() {
   const { sessionId } = useParams()
   const [session, setSession] = useState<ExamSession | null>(null)
   const { attempts, loading } = useExamAttempts(sessionId)
+  const { wordSets } = useWordSets()
+  const wordSetName = wordSets.find((w) => w.id === session?.wordSetId)?.name
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [resettingUid, setResettingUid] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
@@ -81,7 +84,7 @@ export default function ExamMonitor() {
     if (!session) return
     setExporting(true)
     try {
-      await exportExamResultsToExcel(session, attempts)
+      await exportExamResultsToExcel(session, attempts, wordSetName)
     } catch {
       window.alert('엑셀 파일을 만들지 못했습니다. 다시 시도해주세요.')
     } finally {
