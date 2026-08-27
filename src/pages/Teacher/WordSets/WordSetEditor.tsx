@@ -93,7 +93,10 @@ export default function WordSetEditor() {
       let count = 0
       let batch = writeBatch(db)
       for (const line of lines) {
-        const [w, m] = line.split(/\t|,/).map((s) => s?.trim())
+        const sepMatch = line.match(/\t|,/)
+        if (!sepMatch || sepMatch.index == null) continue
+        const w = line.slice(0, sepMatch.index).trim()
+        const m = line.slice(sepMatch.index + 1).trim()
         if (!w || !m) continue
         const ref = doc(collection(db, 'wordSets', setId!, 'entries'))
         batch.set(ref, { word: w, meaning: m, order })
