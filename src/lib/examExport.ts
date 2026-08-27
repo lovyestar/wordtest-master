@@ -45,7 +45,11 @@ function sanitizeSheetName(name: string, used: Set<string>): string {
 
 // Pure workbook builder — no browser APIs, so it can run in Node (for
 // local testing/inspection) as well as in the app itself.
-export async function buildExamResultsWorkbook(session: ExamSession, attempts: ExamAttempt[]): Promise<Workbook> {
+export async function buildExamResultsWorkbook(
+  session: ExamSession,
+  attempts: ExamAttempt[],
+  wordSetName?: string,
+): Promise<Workbook> {
   const ExcelJS = (await import('exceljs')).default
 
   const workbook = new ExcelJS.Workbook()
@@ -62,19 +66,18 @@ export async function buildExamResultsWorkbook(session: ExamSession, attempts: E
   const submittedAttempts = attempts.filter((a) => a.status === 'submitted' && a.accuracy != null)
   const average =
     submittedAttempts.length > 0
-      ? Math.round(
-          (submittedAttempts.reduce((sum, a) => sum + (a.accuracy ?? 0), 0) / submittedAttempts.length) * 100,
-        )
+      ? (submittedAttempts.reduce((sum, a) => sum + (a.accuracy ?? 0), 0) / submittedAttempts.length) * 100
       : null
 
   const summaryRows: [string, string][] = [
     ['시험 이름', session.name],
+    ['단어장', wordSetName || '-'],
     ['일시', formatDateTime(session.openedAt ?? session.createdAt)],
     ['출제자', session.createdByName || '-'],
     ['단어 개수', String(session.questionCount)],
     ['제한시간', `${Math.round(session.durationSeconds / 60)}분`],
     ['유형', MODE_LABEL[session.mode]],
-    ['평균 점수', average != null ? `${average}점` : '-'],
+    ['평균 점수', average != null ? `${average.toFixed(1)}점` : '-'],
     ['응시 인원', `${attempts.length}명 (완료 ${submittedAttempts.length}명)`],
   ]
   for (const [label, value] of summaryRows) {
@@ -163,8 +166,8 @@ export async function buildExamResultsWorkbook(session: ExamSession, attempts: E
   return workbook
 }
 
-export async function exportExamResultsToExcel(session: ExamSession, attempts: ExamAttempt[]) {
-  const workbook = await buildExamResultsWorkbook(session, attempts)
+export async function exportExamResultsToExcel(session: ExamSession, attempts: ExamAttempt[], wordSetName?: string) {
+  const workbook = await buildExamResultsWorkbook(session, attempts, wordSetName)
   const buffer = await workbook.xlsx.writeBuffer()
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
   const url = URL.createObjectURL(blob)

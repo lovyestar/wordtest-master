@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import FullScreenSpinner from '../../components/FullScreenSpinner'
 import { useWordSetEntries } from '../../hooks/useWordSetEntries'
+import { useWordSets } from '../../hooks/useWordSets'
 import { db } from '../../lib/firebase'
 import { buildExamQuestions } from '../../lib/examSession'
 import { useAuthStore } from '../../store/authStore'
@@ -21,6 +22,8 @@ export default function WordTestStart() {
   const [starting, setStarting] = useState(false)
 
   const { entries } = useWordSetEntries(session?.wordSetId)
+  const { wordSets } = useWordSets()
+  const wordSetName = wordSets.find((w) => w.id === session?.wordSetId)?.name
 
   useEffect(() => {
     if (!sessionId || !firebaseUser) return
@@ -124,7 +127,8 @@ export default function WordTestStart() {
     <div className="mx-auto max-w-md">
       <h1 className="text-xl font-bold text-slate-900">{session.name}</h1>
       <p className="mt-1 text-sm text-slate-500">
-        문항 {session.questionCount}개 · 제한시간 {Math.round(session.durationSeconds / 60)}분
+        단어장: {wordSetName ?? '-'} · 문항 {session.questionCount}개 · 제한시간{' '}
+        {Math.round(session.durationSeconds / 60)}분
         {session.createdByName && ` · 출제: ${session.createdByName}`}
       </p>
 
