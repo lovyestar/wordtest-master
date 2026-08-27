@@ -29,8 +29,10 @@ export default function WordTestList() {
                   <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-medium text-white">응시 가능</span>
                 </div>
                 <p className="mt-1 text-xs text-slate-500">
-                  단어장: {wordSets.find((w) => w.id === s.wordSetId)?.name ?? '-'} · 문항 {s.questionCount}개 ·
-                  제한시간 {Math.round(s.durationSeconds / 60)}분
+                  단어장: {wordSets.find((w) => w.id === s.wordSetId)?.name ?? '-'}
+                </p>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  문항 {s.questionCount}개 · 제한시간 {Math.round(s.durationSeconds / 60)}분
                   {s.createdByName && ` · 출제: ${s.createdByName}`}
                 </p>
               </Link>
