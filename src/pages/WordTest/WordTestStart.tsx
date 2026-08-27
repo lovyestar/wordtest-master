@@ -126,9 +126,9 @@ export default function WordTestStart() {
   return (
     <div className="mx-auto max-w-md">
       <h1 className="text-xl font-bold text-slate-900">{session.name}</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        단어장: {wordSetName ?? '-'} · 문항 {session.questionCount}개 · 제한시간{' '}
-        {Math.round(session.durationSeconds / 60)}분
+      <p className="mt-1 text-sm text-slate-500">단어장: {wordSetName ?? '-'}</p>
+      <p className="mt-0.5 text-sm text-slate-500">
+        문항 {session.questionCount}개 · 제한시간 {Math.round(session.durationSeconds / 60)}분
         {session.createdByName && ` · 출제: ${session.createdByName}`}
       </p>
 
