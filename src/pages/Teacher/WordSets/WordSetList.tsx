@@ -20,7 +20,6 @@ export default function WordSetList() {
     try {
       const ref = await addDoc(collection(db, 'wordSets'), {
         name: name.trim(),
-        isDefault: false,
         active: true,
         wordCount: 0,
         createdBy: firebaseUser.uid,
@@ -102,9 +101,6 @@ export default function WordSetList() {
                     <Link to={`/teacher/word-sets/${set.id}`} className="font-medium text-indigo-600 hover:underline">
                       {set.name}
                     </Link>
-                    {set.isDefault && (
-                      <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">기본</span>
-                    )}
                   </td>
                   <td className="px-4 py-3 text-slate-500">{set.createdByName || '-'}</td>
                   <td className="px-4 py-3 text-slate-600">{set.wordCount}</td>

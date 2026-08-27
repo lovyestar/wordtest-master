@@ -18,7 +18,6 @@ export function useWordSets() {
             id: d.id,
             name: data.name,
             description: data.description,
-            isDefault: !!data.isDefault,
             active: data.active !== false,
             wordCount: data.wordCount ?? 0,
             createdBy: data.createdBy,
