@@ -70,6 +70,11 @@ export default function AppShell() {
           <Outlet />
         </div>
         <Footer />
+        <div className="pb-2 text-right">
+          <Link to="/teacher/login" className="text-[11px] text-slate-300 hover:text-slate-500">
+            관리자 페이지로 이동
+          </Link>
+        </div>
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-slate-200 bg-white/95 backdrop-blur md:hidden">
