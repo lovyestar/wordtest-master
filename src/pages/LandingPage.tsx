@@ -42,15 +42,8 @@ export default function LandingPage() {
 
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
-      <a
-        href="/teacher/login"
-        className="fixed bottom-2 right-3 text-[11px] text-slate-300 hover:text-slate-500"
-      >
-        관리자 페이지로 이동
-      </a>
-
       <div className="absolute bottom-0 left-0 right-0">
-        <Footer />
+        <Footer showAdminLink />
       </div>
     </div>
   )
