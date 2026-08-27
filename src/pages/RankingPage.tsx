@@ -86,7 +86,7 @@ export default function RankingPage() {
                       {entry.displayName}
                       {isMe && <span className="ml-1 text-xs text-indigo-500">(나)</span>}
                     </span>
-                    <span className="text-sm font-bold text-indigo-600">{Math.round(entry.bestAccuracy * 100)}%</span>
+                    <span className="text-sm font-bold text-indigo-600">{Math.round(entry.bestAccuracy * 100)}점</span>
                     <span className="text-xs text-slate-400">
                       {entry.correctCount}/{entry.totalQuestions}
                     </span>
