@@ -118,11 +118,6 @@ export async function buildExamResultsWorkbook(session: ExamSession, attempts: E
       ratio: attempt.status === 'submitted' ? `${attempt.correctCount}/${totalQuestions}` : '-',
     })
 
-    const nameCell = row.getCell(1)
-    const sheetName = studentSheetNames.get(attempt.uid)!
-    nameCell.value = { text: attempt.studentName, hyperlink: `#'${sheetName}'!A1` }
-    nameCell.font = { color: { argb: 'FF1155CC' }, underline: true }
-
     const statusCell = row.getCell(2)
     statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: statusInfo.color } }
   }
@@ -163,12 +158,6 @@ export async function buildExamResultsWorkbook(session: ExamSession, attempts: E
     } else {
       sheet.addRow(['제출된 답안이 없습니다.'])
     }
-
-    const backRow = sheet.addRow([])
-    sheet.mergeCells(`A${backRow.number}:D${backRow.number}`)
-    const backCell = sheet.getCell(`A${backRow.number}`)
-    backCell.value = { text: '← 응시자 목록으로', hyperlink: "#'응시자 목록'!A1" }
-    backCell.font = { color: { argb: 'FF1155CC' }, underline: true }
   }
 
   return workbook
