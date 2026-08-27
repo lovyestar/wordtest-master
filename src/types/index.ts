@@ -15,7 +15,6 @@ export interface WordSet {
   id: string
   name: string
   description?: string
-  isDefault: boolean
   active: boolean
   wordCount: number
   createdBy: string
