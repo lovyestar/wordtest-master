@@ -2,7 +2,9 @@ import { collection, deleteDoc, doc, getDocs, onSnapshot, serverTimestamp, updat
 import { Fragment, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useExamAttempts } from '../../../hooks/useExamAttempts'
+import { exportExamResultsToExcel } from '../../../lib/examExport'
 import { db } from '../../../lib/firebase'
+import { toMillis } from '../../../lib/firestoreUtils'
 import type { ExamSession } from '../../../types'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -30,6 +32,7 @@ export default function ExamMonitor() {
   const { attempts, loading } = useExamAttempts(sessionId)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [resettingUid, setResettingUid] = useState<string | null>(null)
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     if (!sessionId) return
@@ -41,11 +44,14 @@ export default function ExamMonitor() {
         name: data.name,
         wordSetId: data.wordSetId,
         createdBy: data.createdBy,
-        createdAt: 0,
+        createdByName: data.createdByName,
+        createdAt: toMillis(data.createdAt),
         durationSeconds: data.durationSeconds,
         questionCount: data.questionCount,
         mode: data.mode,
         status: data.status,
+        openedAt: data.openedAt ? toMillis(data.openedAt) : undefined,
+        closedAt: data.closedAt ? toMillis(data.closedAt) : undefined,
       })
     })
   }, [sessionId])
@@ -68,6 +74,18 @@ export default function ExamMonitor() {
       window.alert('재시험 초기화에 실패했습니다. 다시 시도해주세요.')
     } finally {
       setResettingUid(null)
+    }
+  }
+
+  async function handleExport() {
+    if (!session) return
+    setExporting(true)
+    try {
+      await exportExamResultsToExcel(session, attempts)
+    } catch {
+      window.alert('엑셀 파일을 만들지 못했습니다. 다시 시도해주세요.')
+    } finally {
+      setExporting(false)
     }
   }
 
@@ -99,17 +117,27 @@ export default function ExamMonitor() {
             (제출 {submittedCount} · 실격 {disqualifiedCount})
           </p>
         </div>
-        {session.status === 'open' ? (
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={closeSession}
-            className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+            onClick={handleExport}
+            disabled={exporting || attempts.length === 0}
+            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
           >
-            시험 종료
+            {exporting ? '내보내는 중...' : '엑셀 다운로드'}
           </button>
-        ) : (
-          <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-500">종료됨</span>
-        )}
+          {session.status === 'open' ? (
+            <button
+              type="button"
+              onClick={closeSession}
+              className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+            >
+              시험 종료
+            </button>
+          ) : (
+            <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-500">종료됨</span>
+          )}
+        </div>
       </div>
 
       <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
