@@ -28,6 +28,11 @@ export default function WordStudyList() {
                   <span className="font-semibold text-slate-900">{set.name}</span>
                   <span className="text-xs text-slate-400">{set.wordCount}단어</span>
                 </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  {set.description}
+                  {set.description && set.createdByName && ' · '}
+                  {set.createdByName && `만든 사람: ${set.createdByName}`}
+                </p>
               </Link>
             </li>
           ))}
