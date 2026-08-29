@@ -1,6 +1,7 @@
 import { doc, setDoc } from 'firebase/firestore'
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import ThemeToggle from '../components/ThemeToggle'
 import { db } from '../lib/firebase'
 import { useAuthStore } from '../store/authStore'
 
@@ -46,6 +47,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="mx-auto mt-24 max-w-sm px-4">
+      <ThemeToggle className="fixed top-4 right-4" />
       <h1 className="text-center text-xl font-bold text-slate-900">가입 정보 입력</h1>
       <p className="mt-2 text-center text-sm text-slate-500">
         랭킹과 시험에는 구글 닉네임 대신 이름과 학번이 표시됩니다.

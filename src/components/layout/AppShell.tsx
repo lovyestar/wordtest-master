@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
+import ThemeToggle from '../ThemeToggle'
 import { signOutUser } from '../../lib/auth'
 import { useAuthStore } from '../../store/authStore'
 import Footer from './Footer'
@@ -45,6 +46,7 @@ export default function AppShell() {
           </nav>
 
           <div className="flex shrink-0 items-center gap-2">
+            <ThemeToggle />
             {profile?.photoURL && (
               <img src={profile.photoURL} alt="" className="h-8 w-8 rounded-full" referrerPolicy="no-referrer" />
             )}

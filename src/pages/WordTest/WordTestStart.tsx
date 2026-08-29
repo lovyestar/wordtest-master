@@ -2,6 +2,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import FullScreenSpinner from '../../components/FullScreenSpinner'
+import ThemeToggle from '../../components/ThemeToggle'
 import { useWordSetEntries } from '../../hooks/useWordSetEntries'
 import { useWordSets } from '../../hooks/useWordSets'
 import { db } from '../../lib/firebase'
@@ -76,6 +77,7 @@ export default function WordTestStart() {
   if (existingStatus === 'disqualified') {
     return (
       <div className="mx-auto max-w-md text-center">
+        <ThemeToggle className="fixed top-4 right-4" />
         <p className="text-lg font-semibold text-red-600">부정행위로 응시가 취소되었습니다.</p>
         <p className="mt-2 text-sm text-slate-500">이 시험은 다시 응시할 수 없습니다.</p>
       </div>
@@ -125,6 +127,7 @@ export default function WordTestStart() {
 
   return (
     <div className="mx-auto max-w-md">
+      <ThemeToggle className="fixed top-4 right-4" />
       <h1 className="text-xl font-bold text-slate-900">{session.name}</h1>
       <p className="mt-1 text-sm text-slate-500">단어장: {wordSetName ?? '-'}</p>
       <p className="mt-0.5 text-sm text-slate-500">
