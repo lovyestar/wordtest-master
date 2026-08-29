@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import ThemeToggle from '../ThemeToggle'
 import { signOutUser } from '../../lib/auth'
 import { useAuthStore } from '../../store/authStore'
 import Footer from './Footer'
@@ -38,7 +39,7 @@ export default function TeacherShell() {
                   end={tab.end}
                   className={({ isActive }) =>
                     `whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                      isActive ? 'bg-white text-slate-900' : 'text-slate-300 hover:bg-slate-800'
+                      isActive ? 'bg-[#fff] text-[#0f172a]' : 'text-slate-300 hover:bg-slate-800'
                     }`
                   }
                 >
@@ -48,6 +49,7 @@ export default function TeacherShell() {
             </nav>
           </div>
           <div className="flex shrink-0 items-center gap-3 text-sm text-slate-300">
+            <ThemeToggle variant="onDark" />
             <span className="whitespace-nowrap">{adminProfile?.email}</span>
             <button
               type="button"

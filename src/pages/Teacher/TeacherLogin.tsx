@@ -1,6 +1,7 @@
 import { doc, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
+import ThemeToggle from '../../components/ThemeToggle'
 import { signInWithGoogle, signOutUser } from '../../lib/auth'
 import { db } from '../../lib/firebase'
 import { useAuthStore } from '../../store/authStore'
@@ -24,6 +25,7 @@ export default function TeacherLogin() {
   if (!loading && firebaseUser && !adminProfile) {
     return (
       <div className="mx-auto mt-24 max-w-sm text-center">
+        <ThemeToggle className="fixed top-4 right-4" />
         {applicationStatus === 'pending' ? (
           <>
             <p className="text-sm font-semibold text-amber-600">선생님 등록 승인 대기 중입니다.</p>
@@ -75,6 +77,7 @@ export default function TeacherLogin() {
 
   return (
     <div className="mx-auto mt-24 max-w-sm text-center">
+      <ThemeToggle className="fixed top-4 right-4" />
       <a href="/" className="mb-4 block text-xs text-slate-400 hover:text-slate-600">
         ← 일반 로그인으로 돌아가기
       </a>

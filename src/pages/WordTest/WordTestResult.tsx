@@ -1,6 +1,7 @@
 import { doc, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
+import ThemeToggle from '../../components/ThemeToggle'
 import { db } from '../../lib/firebase'
 import { useAuthStore } from '../../store/authStore'
 import type { GradedAnswer } from '../../types'
@@ -37,6 +38,7 @@ export default function WordTestResult() {
 
   return (
     <div className="mx-auto max-w-lg">
+      <ThemeToggle className="fixed top-4 right-4" />
       <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
         <p className="text-sm text-slate-500">시험 종료</p>
         <p className="mt-1 text-5xl font-extrabold text-indigo-600">{score}점</p>
