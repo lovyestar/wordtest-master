@@ -1,6 +1,7 @@
 import { doc, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import ThemeToggle from '../../components/ThemeToggle'
 import { signInWithGoogle, submitTeacherApplication } from '../../lib/auth'
 import { db } from '../../lib/firebase'
 import { useAuthStore } from '../../store/authStore'
@@ -60,6 +61,7 @@ export default function TeacherSignup() {
   if (!loading && firebaseUser && applicationStatus === 'pending') {
     return (
       <div className="mx-auto mt-24 max-w-sm text-center">
+        <ThemeToggle className="fixed top-4 right-4" />
         <p className="text-sm font-semibold text-amber-600">이미 승인 대기 중인 신청이 있습니다.</p>
         <p className="mt-1 text-xs text-slate-500">승인이 완료되면 관리자 페이지를 이용할 수 있어요.</p>
       </div>
@@ -68,6 +70,7 @@ export default function TeacherSignup() {
 
   return (
     <div className="mx-auto mt-24 max-w-sm px-4 text-center">
+      <ThemeToggle className="fixed top-4 right-4" />
       <a href="/teacher/login" className="mb-4 block text-xs text-slate-400 hover:text-slate-600">
         ← 관리자 로그인으로 돌아가기
       </a>
@@ -97,7 +100,7 @@ export default function TeacherSignup() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-full bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+            className="w-full rounded-full bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-slate-600"
           >
             {submitting ? '신청 중...' : '가입 신청'}
           </button>
