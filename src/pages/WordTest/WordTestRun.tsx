@@ -224,6 +224,14 @@ export default function WordTestRun() {
 
   return (
     <div className="mx-auto max-w-lg">
+      <div className="fixed top-4 right-4 z-30 flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 py-1.5 pl-2.5 pr-3 text-xs font-medium text-emerald-700 shadow-sm">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+        </span>
+        CheckStar가 안전하게 시험을 관리하는 중입니다
+      </div>
+
       <div className="mb-4 flex items-center justify-between text-sm">
         <span className="text-slate-400">
           {index + 1} / {questions.length}

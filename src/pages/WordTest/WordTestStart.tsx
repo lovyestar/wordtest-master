@@ -102,6 +102,7 @@ export default function WordTestStart() {
 
     setStarting(true)
     setError(null)
+    await new Promise((resolve) => setTimeout(resolve, 2000))
     try {
       const questions = buildExamQuestions(entries, session)
       const attemptRef = doc(db, 'examSessions', sessionId, 'attempts', firebaseUser.uid)
@@ -139,7 +140,10 @@ export default function WordTestStart() {
         <p className="font-semibold">응시 전 확인해주세요</p>
         <ul className="mt-2 list-disc space-y-1 pl-4">
           <li>구글 로그인 여부와 관계없이 반드시 본인의 실명을 입력해야 합니다.</li>
-          <li>시험 중 다른 탭/창으로 이동하거나 전체화면을 벗어나면 부정행위로 처리되어 응시가 자동 취소됩니다.</li>
+          <li>
+            시험 중에는 <b>CheckStar</b>가 화면 이탈(다른 탭/창 전환, 전체화면 벗어남)을 감지하며, 감지 시
+            부정행위로 처리되어 응시가 자동 취소됩니다.
+          </li>
           <li>시험을 시작하면 중간에 되돌릴 수 없습니다.</li>
         </ul>
       </div>
@@ -162,7 +166,7 @@ export default function WordTestStart() {
         disabled={starting}
         className="mt-6 w-full rounded-full bg-indigo-600 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
       >
-        {starting ? '시작하는 중...' : '시험 시작 (전체화면으로 전환됩니다)'}
+        {starting ? 'CheckStar가 시작하고 있습니다...' : '시험 시작 (CheckStar 감시가 시작됩니다)'}
       </button>
     </div>
   )
