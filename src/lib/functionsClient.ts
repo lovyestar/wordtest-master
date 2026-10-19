@@ -27,3 +27,8 @@ export const reviewTeacherApplicationFn = httpsCallable<
 >(functions, 'reviewTeacherApplication')
 
 export const removeAdminFn = httpsCallable<{ uid: string }, { removed: boolean }>(functions, 'removeAdmin')
+
+export const generateMissingPronunciationsFn = httpsCallable<
+  { wordSetId: string },
+  { total: number; generated: number; failed: number }
+>(functions, 'generateMissingPronunciations', { timeout: 540_000 })

@@ -1,8 +1,10 @@
 import { initializeApp } from 'firebase-admin/app'
 import { FieldValue, getFirestore } from 'firebase-admin/firestore'
 import { HttpsError, onCall } from 'firebase-functions/v2/https'
-import { setGlobalOptions } from 'firebase-functions/v2'
+import { onDocumentWritten } from 'firebase-functions/v2/firestore'
+import { logger, setGlobalOptions } from 'firebase-functions/v2'
 import { getKstDateKey, isCorrectAnswer, type ExamDirection } from './grading.js'
+import { ensurePronunciation, pronunciationPath } from './pronunciation.js'
 
 initializeApp()
 const db = getFirestore()
@@ -311,3 +313,78 @@ export const removeAdmin = onCall<{ uid: string }>(async (request) => {
   await db.doc(`admins/${uid}`).delete()
   return { removed: true }
 })
+
+// ---- Word pronunciation: synthesized once with Google Cloud TTS, stored in
+// Storage, and linked from the entry's `audioPath` so every device plays the
+// same audio (browser speech synthesis varies wildly between devices). ----
+
+async function syncEntryPronunciation(
+  ref: FirebaseFirestore.DocumentReference,
+  word: unknown,
+  currentPath: unknown,
+): Promise<'generated' | 'skipped'> {
+  const expected = typeof word === 'string' ? pronunciationPath(word) : null
+  if (currentPath === (expected ?? undefined)) return 'skipped'
+  const path = expected ? await ensurePronunciation(word as string) : null
+  // Writing audioPath re-fires the trigger, but the second run sees a
+  // matching path and stops. If the word changed mid-generation, the later
+  // run sees a mismatch again and corrects it.
+  await ref.update({ audioPath: path ?? FieldValue.delete() })
+  return 'generated'
+}
+
+export const onWordEntryWritten = onDocumentWritten(
+  // Caps parallel TTS calls during a bulk import at 10 × 5 = 50 (the default
+  // would be 80 per instance); the retry in synthesize() absorbs quota bursts.
+  { document: 'wordSets/{setId}/entries/{entryId}', maxInstances: 10, concurrency: 5 },
+  async (event) => {
+    const after = event.data?.after
+    if (!after?.exists) return
+    try {
+      await syncEntryPronunciation(after.ref, after.get('word'), after.get('audioPath'))
+    } catch (err) {
+      // Entry deleted mid-generation: nothing left to link.
+      if ((err as { code?: number }).code === 5) return
+      logger.error('pronunciation generation failed', { path: after.ref.path, err })
+    }
+  },
+)
+
+// Backfill for words added before this feature existed, and a manual retry
+// for any word whose trigger run failed.
+export const generateMissingPronunciations = onCall<{ wordSetId: string }>(
+  { timeoutSeconds: 540 },
+  async (request) => {
+    const uid = request.auth?.uid
+    if (!uid) throw new HttpsError('unauthenticated', '로그인이 필요합니다.')
+    const adminSnap = await db.doc(`admins/${uid}`).get()
+    if (!adminSnap.exists) throw new HttpsError('permission-denied', '선생님만 실행할 수 있습니다.')
+
+    const { wordSetId } = request.data ?? {}
+    if (!wordSetId) throw new HttpsError('invalid-argument', '잘못된 요청입니다.')
+
+    const snap = await db.collection(`wordSets/${wordSetId}/entries`).get()
+    const pending = snap.docs.filter((d) => {
+      const expected = pronunciationPath(String(d.get('word') ?? ''))
+      return d.get('audioPath') !== (expected ?? undefined)
+    })
+
+    let generated = 0
+    let failed = 0
+    const queue = [...pending]
+    const workers = Array.from({ length: 5 }, async () => {
+      for (let d = queue.shift(); d; d = queue.shift()) {
+        try {
+          await syncEntryPronunciation(d.ref, d.get('word'), d.get('audioPath'))
+          generated += 1
+        } catch (err) {
+          failed += 1
+          logger.error('pronunciation backfill failed', { path: d.ref.path, err })
+        }
+      }
+    })
+    await Promise.all(workers)
+
+    return { total: snap.size, generated, failed }
+  },
+)
