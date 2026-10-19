@@ -9,6 +9,8 @@ export interface WordEntry {
   word: string
   meaning: string
   order: number
+  /** Storage path of the synthesized pronunciation, set by a Cloud Function. */
+  audioPath?: string
 }
 
 export interface WordSet {

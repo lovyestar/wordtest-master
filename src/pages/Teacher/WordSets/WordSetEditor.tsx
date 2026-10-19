@@ -9,9 +9,11 @@ import {
 } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import SpeakButton from '../../../components/SpeakButton'
 import { useWordSetEntries } from '../../../hooks/useWordSetEntries'
 import { useWordSets } from '../../../hooks/useWordSets'
 import { db } from '../../../lib/firebase'
+import { generateMissingPronunciationsFn } from '../../../lib/functionsClient'
 
 export default function WordSetEditor() {
   const { setId } = useParams()
@@ -35,7 +37,28 @@ export default function WordSetEditor() {
   const [importing, setImporting] = useState(false)
   const [importMsg, setImportMsg] = useState<string | null>(null)
 
+  const [generatingAudio, setGeneratingAudio] = useState(false)
+  const [audioMsg, setAudioMsg] = useState<string | null>(null)
+  const audioReadyCount = entries.filter((e) => e.audioPath).length
+
   if (!setId) return null
+
+  async function handleGenerateAudio() {
+    setGeneratingAudio(true)
+    setAudioMsg(null)
+    try {
+      const { data } = await generateMissingPronunciationsFn({ wordSetId: setId! })
+      setAudioMsg(
+        data.failed > 0
+          ? `${data.generated}개 생성, ${data.failed}개 실패 — 다시 눌러주세요.`
+          : `${data.generated}개 단어의 발음을 만들었습니다.`,
+      )
+    } catch {
+      setAudioMsg('발음 생성에 실패했습니다. 잠시 후 다시 시도해주세요.')
+    } finally {
+      setGeneratingAudio(false)
+    }
+  }
 
   async function handleAddEntry() {
     if (!word.trim() || !meaning.trim()) return
@@ -165,7 +188,19 @@ export default function WordSetEditor() {
           <p className="mt-1 text-sm text-slate-500">
             {entries.length}개 단어
             {set?.createdByName && ` · 만든 사람: ${set.createdByName}`}
+            {!loading && entries.length > 0 && ` · 발음 ${audioReadyCount}/${entries.length}개 준비됨`}
           </p>
+          {!loading && audioReadyCount < entries.length && (
+            <button
+              type="button"
+              onClick={handleGenerateAudio}
+              disabled={generatingAudio}
+              className="mt-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+            >
+              {generatingAudio ? '발음 만드는 중... (단어가 많으면 몇 분 걸려요)' : '빠진 발음 만들기'}
+            </button>
+          )}
+          {audioMsg && <p className="mt-1 text-xs text-slate-500">{audioMsg}</p>}
         </div>
         {set && (
           <button
@@ -244,7 +279,12 @@ export default function WordSetEditor() {
             ) : (
               entries.map((entry) => (
                 <tr key={entry.id}>
-                  <td className="px-4 py-2 font-medium text-slate-800">{entry.word}</td>
+                  <td className="px-4 py-2 font-medium text-slate-800">
+                    <span className="flex items-center gap-1">
+                      {entry.word}
+                      <SpeakButton audioPath={entry.audioPath} word={entry.word} />
+                    </span>
+                  </td>
                   <td className="px-4 py-2 text-slate-600">{entry.meaning}</td>
                   <td className="px-4 py-2 text-right">
                     <button

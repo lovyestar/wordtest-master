@@ -10,6 +10,8 @@
 
 - **랭킹**: 오늘 응시한 단어 모의 시험 중 최고 점수 기준 실시간 순위
 - **단어장 / 단어 외우기**: 단어장 열람, 단어를 하나씩 넘기며 학습 (채점·랭킹 반영 없음)
+- **단어 발음 듣기**: 단어가 등록되면 Cloud Function이 Google Cloud TTS로 mp3를 미리 만들어 두어,
+  모든 기기에서 같은 음성으로 재생 (감독 시험 화면에는 노출하지 않음)
 - **단어 모의 시험**: 학생이 원할 때마다 자율적으로 응시하는 연습 시험
 - **단어 테스트**: 선생님이 개설하는 감독 시험 — 실명 응시, **CheckStar**가 탭 전환/창 포커스
   이탈/전체화면 이탈을 감지해 자동 실격 처리
@@ -33,6 +35,7 @@
 
 - Node.js 20 이상
 - Firebase 프로젝트 (Auth: Google 로그인 활성화 / Firestore / Storage / Blaze 요금제)
+- 같은 GCP 프로젝트에서 [Cloud Text-to-Speech API](https://console.cloud.google.com/apis/library/texttospeech.googleapis.com) 사용 설정 (단어 발음용)
 - Firebase CLI (`npm i -g firebase-tools`)
 
 ### 2. 설치
@@ -86,8 +89,8 @@ GOOGLE_APPLICATION_CREDENTIALS="/path/to/serviceAccountKey.json" npm run seed
 ### 7. 배포
 
 ```bash
-# Firestore 규칙 / Cloud Functions
-firebase deploy --only firestore:rules,functions
+# Firestore·Storage 규칙 / Cloud Functions
+firebase deploy --only firestore:rules,storage,functions
 
 # 프론트엔드 (Cloudflare Workers)
 npm run deploy
