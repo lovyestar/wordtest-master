@@ -2,7 +2,7 @@ export type ExamMode = 'en2ko' | 'ko2en'
 export type ExamSessionMode = ExamMode | 'mixed'
 export type ExamSessionStatus = 'draft' | 'open' | 'closed'
 export type AttemptStatus = 'in_progress' | 'submitted' | 'disqualified' | 'timed_out'
-export type ViolationType = 'visibility_hidden' | 'blur' | 'fullscreen_exit' | 'page_reload'
+export type ViolationType = 'visibility_hidden' | 'blur' | 'fullscreen_exit' | 'page_reload' | 'navigate_away'
 
 export interface WordEntry {
   id: string

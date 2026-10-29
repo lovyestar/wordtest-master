@@ -41,6 +41,7 @@ export function startEvidenceRecorder() {
     on(window, 'blur', () => push('window blur')),
     on(window, 'focus', () => push('window focus')),
     on(document, 'fullscreenchange', () => push(document.fullscreenElement ? 'fullscreen enter' : 'fullscreen exit')),
+    on(window, 'popstate', () => push('history back')),
     on(window, 'resize', () => push(`resize ${window.innerWidth}x${window.innerHeight}`)),
     on(window, 'online', () => push('network online')),
     on(window, 'offline', () => push('network offline')),

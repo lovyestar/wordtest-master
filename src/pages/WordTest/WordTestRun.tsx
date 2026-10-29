@@ -25,6 +25,7 @@ const DISQUALIFY_MESSAGE: Record<ViolationType, string> = {
   blur: '시험 창에서 다른 창·프로그램으로 포커스가 이동했습니다.',
   fullscreen_exit: '시험 중 전체화면을 해제했습니다.',
   page_reload: '시험 중 페이지를 새로고침했습니다.',
+  navigate_away: '시험 중 뒤로 가기(이전 페이지 이동)를 사용했습니다.',
 }
 
 interface LogLine {
@@ -240,6 +241,15 @@ export default function WordTestRun() {
       if (document.fullscreenElement) wasFullscreenRef.current = true
       else disqualify('fullscreen_exit')
     }
+    // Browser Back (e.g. the Chromebook "back" key) leaves the page without any
+    // blur/visibility/fullscreen event. Park a history entry on top so Back
+    // pops it here, and treat that as leaving the exam.
+    history.pushState({ csGuard: true }, '', window.location.href)
+    function onPopState() {
+      disqualify('navigate_away')
+      history.pushState({ csGuard: true }, '', window.location.href)
+    }
+    window.addEventListener('popstate', onPopState)
     // Backstop for events missed while the tab was in the background (e.g.
     // Chromebook tab-switch / exit-fullscreen keys): re-check on return and
     // periodically.
@@ -258,6 +268,7 @@ export default function WordTestRun() {
     document.addEventListener('fullscreenchange', onFullscreenChange)
     return () => {
       clearInterval(intervalId)
+      window.removeEventListener('popstate', onPopState)
       window.removeEventListener('focus', check)
       window.removeEventListener('pageshow', check)
       document.removeEventListener('visibilitychange', onVisibility)
