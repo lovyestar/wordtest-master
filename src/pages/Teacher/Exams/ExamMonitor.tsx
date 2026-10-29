@@ -7,6 +7,7 @@ import { exportExamResultsToExcel } from '../../../lib/examExport'
 import { db } from '../../../lib/firebase'
 import { toMillis } from '../../../lib/firestoreUtils'
 import type { ExamSession } from '../../../types'
+import ViolationEvidence, { VIOLATION_LABEL } from './ViolationEvidence'
 
 const STATUS_LABEL: Record<string, string> = {
   in_progress: '응시 중',
@@ -20,12 +21,6 @@ const STATUS_STYLE: Record<string, string> = {
   disqualified: 'bg-red-100 text-red-700',
   timed_out: 'bg-slate-100 text-slate-500',
 }
-const VIOLATION_LABEL: Record<string, string> = {
-  visibility_hidden: '탭 전환 감지',
-  blur: '창 포커스 이탈',
-  fullscreen_exit: '전체화면 이탈',
-  page_reload: '새로고침',
-}
 
 export default function ExamMonitor() {
   const { sessionId } = useParams()
@@ -34,6 +29,7 @@ export default function ExamMonitor() {
   const { wordSets } = useWordSets()
   const wordSetName = wordSets.find((w) => w.id === session?.wordSetId)?.name
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [evidenceOpen, setEvidenceOpen] = useState<Set<string>>(new Set())
   const [resettingUid, setResettingUid] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
 
@@ -90,6 +86,15 @@ export default function ExamMonitor() {
     } finally {
       setExporting(false)
     }
+  }
+
+  function toggleEvidence(uid: string) {
+    setEvidenceOpen((prev) => {
+      const next = new Set(prev)
+      if (next.has(uid)) next.delete(uid)
+      else next.add(uid)
+      return next
+    })
   }
 
   function toggleExpanded(uid: string) {
@@ -194,6 +199,13 @@ export default function ExamMonitor() {
                         {a.status === 'submitted' && a.accuracy != null ? `${Math.round(a.accuracy * 100)}점` : '–'}
                       </td>
                       <td className="px-4 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => toggleEvidence(a.uid)}
+                          className="mr-3 text-xs text-red-500 hover:text-red-700"
+                        >
+                          {evidenceOpen.has(a.uid) ? '근거 닫기' : '감지 근거'}
+                        </button>
                         {a.status !== 'in_progress' && (
                           <button
                             type="button"
@@ -215,6 +227,13 @@ export default function ExamMonitor() {
                         )}
                       </td>
                     </tr>
+                    {evidenceOpen.has(a.uid) && (
+                      <tr>
+                        <td colSpan={5} className="bg-slate-50 px-4 py-3">
+                          <ViolationEvidence sessionId={sessionId!} uid={a.uid} studentName={a.studentName} />
+                        </td>
+                      </tr>
+                    )}
                     {hasAnswers && isOpen && (
                       <tr>
                         <td colSpan={5} className="bg-slate-50 px-4 py-3">

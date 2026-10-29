@@ -17,9 +17,16 @@ export function useWordSetEntries(wordSetId: string | null | undefined) {
     const q = query(collection(db, 'wordSets', wordSetId, 'entries'), orderBy('order', 'asc'))
     const unsub = onSnapshot(q, (snap) => {
       setEntries(
-        snap.docs.map(
-          (d) => ({ id: d.id, word: d.data().word, meaning: d.data().meaning, order: d.data().order }) as WordEntry,
-        ),
+        snap.docs.map((d) => {
+          const data = d.data()
+          return {
+            id: d.id,
+            word: data.word,
+            meaning: data.meaning,
+            order: data.order,
+            audioPath: data.audioPath,
+          } as WordEntry
+        }),
       )
       setLoading(false)
     })

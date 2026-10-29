@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import SpeakButton from '../../components/SpeakButton'
 import { useWordSetEntries } from '../../hooks/useWordSetEntries'
 import { useWordSets } from '../../hooks/useWordSets'
 import { isCorrectAnswer } from '../../lib/clientGrading'
@@ -194,7 +195,12 @@ export default function WordStudyRun() {
         <p className="text-xs uppercase tracking-wide text-slate-400">
           {mode === 'en2ko' ? '이 단어의 뜻은?' : '이 뜻에 해당하는 단어는?'}
         </p>
-        <p className="mt-3 text-2xl font-bold text-slate-900 break-keep">{prompt}</p>
+        <div className="mt-3 flex items-center justify-center gap-1">
+          <p className="text-2xl font-bold text-slate-900 break-keep">{prompt}</p>
+          {/* In 뜻→단어 mode the audio would give the answer away; there the
+              button shows up next to the word in the feedback instead. */}
+          {mode === 'en2ko' && <SpeakButton audioPath={question!.audioPath} word={question!.word} size="lg" />}
+        </div>
       </div>
 
       {checked ? (
@@ -204,13 +210,19 @@ export default function WordStudyRun() {
               checked.correct ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-600'
             }`}
           >
-            {checked.correct ? (
-              '정답입니다!'
-            ) : (
-              <>
-                오답입니다. 정답: <span className="font-semibold">{correctAnswerText}</span>
-              </>
-            )}
+            <span className="inline-flex flex-wrap items-center justify-center gap-x-1">
+              {checked.correct ? (
+                <>
+                  정답입니다!
+                  {mode === 'ko2en' && <span className="font-semibold">{question!.word}</span>}
+                </>
+              ) : (
+                <>
+                  오답입니다. 정답: <span className="font-semibold">{correctAnswerText}</span>
+                </>
+              )}
+              {mode === 'ko2en' && <SpeakButton audioPath={question!.audioPath} word={question!.word} />}
+            </span>
           </div>
           <button
             type="button"
