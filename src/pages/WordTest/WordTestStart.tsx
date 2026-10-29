@@ -127,7 +127,7 @@ export default function WordTestStart() {
   }
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto flex min-h-[80vh] w-full max-w-md flex-col justify-center">
       <ThemeToggle className="fixed top-4 right-4" />
       <h1 className="text-xl font-bold text-slate-900">{session.name}</h1>
       <p className="mt-1 text-sm text-slate-500">단어장: {wordSetName ?? '-'}</p>
