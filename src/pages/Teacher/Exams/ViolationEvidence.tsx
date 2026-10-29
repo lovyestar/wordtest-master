@@ -9,10 +9,11 @@ export const VIOLATION_LABEL: Record<string, string> = {
   blur: '창 포커스 이탈',
   fullscreen_exit: '전체화면 해제',
   page_reload: '새로고침',
+  navigate_away: '뒤로 가기(페이지 이동)',
   returned: '시험 화면 복귀',
 }
 
-const FATAL = new Set(['visibility_hidden', 'blur', 'fullscreen_exit'])
+const FATAL = new Set(['visibility_hidden', 'blur', 'fullscreen_exit', 'navigate_away'])
 
 
 const KEY_LABEL: Record<string, string> = {
@@ -45,6 +46,7 @@ const KEY_LABEL: Record<string, string> = {
 /** Turns a recorded raw event ("key Ctrl+T", "visibility hidden") into plain Korean. */
 function describeEvent(raw: string): { text: string; severity: 'info' | 'warn' | 'bad' } {
   if (raw.startsWith('DISQUALIFIED')) return { text: '실격 처리됨', severity: 'bad' }
+  if (raw === 'history back') return { text: '뒤로 가기 (Chromebook 이전 페이지 키 등)', severity: 'bad' }
   if (raw === 'visibility hidden') return { text: '다른 탭으로 이동하거나 창을 숨김', severity: 'bad' }
   if (raw === 'visibility visible') return { text: '시험 화면이 다시 보임', severity: 'info' }
   if (raw === 'window blur') return { text: '시험 창이 포커스를 잃음', severity: 'bad' }
@@ -106,6 +108,7 @@ const VIOLATION_SENTENCE: Record<string, string> = {
   blur: '시험 창에서 다른 창으로 포커스를 옮김',
   fullscreen_exit: '전체화면을 해제',
   page_reload: '페이지를 새로고침',
+  navigate_away: '뒤로 가기(이전 페이지 이동)를 사용',
   returned: '시험 화면으로 돌아옴',
 }
 
