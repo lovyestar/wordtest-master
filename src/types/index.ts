@@ -137,8 +137,31 @@ export interface ExamAttempt {
   disqualifiedReason?: ViolationType
 }
 
+export type ViolationLogType = ViolationType | 'returned'
+
+/** Context captured on the student's device at the moment of a violation. */
+export interface ViolationDetail {
+  /** Seconds since the exam screen opened. */
+  elapsedSec: number
+  questionNumber: number
+  visibility: string
+  hasFocus: boolean
+  fullscreen: boolean
+  online: boolean
+  viewport: string
+  screen: string
+  userAgent: string
+  /** Client wall-clock time (ISO); the trusted time is `at`. */
+  clientTime: string
+  /** Seconds the student was away (type === 'returned' only). */
+  awaySec?: number
+  /** Last events leading up to the violation, newest last, e.g. "-0.4s key Ctrl+T". */
+  recent: string[]
+}
+
 export interface ExamViolation {
   id: string
-  type: ViolationType
+  type: ViolationLogType
   at: number
+  detail?: ViolationDetail
 }
