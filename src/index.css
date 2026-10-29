@@ -89,3 +89,63 @@ body {
 .dark .hover\:text-slate-700:hover { color: #e2e8f0; }
 .dark .hover\:text-slate-800:hover { color: #f1f5f9; }
 .dark .hover\:border-slate-300:hover { border-color: #475569; }
+
+/* CheckStar live log line: appears, holds, then fades out. */
+@keyframes cs-log {
+  0% { opacity: 0; transform: translateY(6px); }
+  10% { opacity: 1; transform: translateY(0); }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.cs-log-line {
+  animation: cs-log 4.5s ease-out forwards;
+}
+
+/* CheckStar opening notice: slide-in, light sweep, countdown bar. */
+@keyframes cs-notice-in {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes cs-item {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cs-bar {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.cs-notice-in {
+  animation: cs-notice-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.cs-notice-item {
+  opacity: 0;
+  animation: cs-item 0.45s ease-out forwards;
+}
+.cs-check {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: cs-draw 0.55s cubic-bezier(0.65, 0, 0.35, 1) 0.45s forwards;
+}
+@keyframes cs-draw {
+  to { stroke-dashoffset: 0; }
+}
+.cs-icon-glow {
+  animation: cs-glow 1.6s ease-out 0.9s 1 both;
+}
+@keyframes cs-glow {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  100% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+}
+.cs-notice-bar {
+  animation: cs-bar 6s linear both;
+}
+
+/* Notice timer bar: glowing head rides the shrinking line. */
+.cs-bar-head {
+  animation: cs-bar-head 6s linear both;
+  box-shadow: 0 0 8px 2px rgba(52, 211, 153, 0.8);
+}
+@keyframes cs-bar-head {
+  from { left: calc(100% - 8px); }
+  to { left: 0; }
+}
