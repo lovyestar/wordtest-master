@@ -10,5 +10,13 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*');
       allow delete: if request.auth != null && request.auth.uid == uid;
     }
+
+    // Word pronunciation audio, written only by Cloud Functions (Admin SDK).
+    // Public read so the page can build a plain URL and play it straight
+    // from the tap — iOS blocks audio started after an async token fetch.
+    match /pronunciations/{fileName} {
+      allow read: if true;
+      allow write: if false;
+    }
   }
 }

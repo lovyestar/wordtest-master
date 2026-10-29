@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import SpeakButton from '../../components/SpeakButton'
 import { useWordSetEntries } from '../../hooks/useWordSetEntries'
 import { useWordSets } from '../../hooks/useWordSets'
 
@@ -42,9 +43,12 @@ export default function WordSetBrowseDetail() {
           <p className="px-4 py-6 text-center text-sm text-slate-400">검색 결과가 없습니다.</p>
         ) : (
           filtered.map((entry) => (
-            <div key={entry.id} className="flex items-center justify-between px-4 py-3 text-sm">
-              <span className="font-medium text-slate-800">{entry.word}</span>
-              <span className="text-slate-500">{entry.meaning}</span>
+            <div key={entry.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+              <span className="flex items-center gap-1 font-medium text-slate-800">
+                {entry.word}
+                <SpeakButton audioPath={entry.audioPath} word={entry.word} />
+              </span>
+              <span className="text-right text-slate-500">{entry.meaning}</span>
             </div>
           ))
         )}
