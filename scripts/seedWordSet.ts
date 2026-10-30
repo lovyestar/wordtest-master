@@ -2,9 +2,11 @@ import { readFileSync } from 'node:fs'
 import { getFirestore } from 'firebase-admin/firestore'
 import { adminApp } from './adminApp.js'
 
-const SOURCE_PATH =
-  process.argv[2] ??
-  '/private/tmp/claude-501/-Users-lovyestar-Pr-engkm-master/fc09e79d-0298-40de-833d-e425a64eaa36/scratchpad/entries_final.json'
+const SOURCE_PATH = process.argv[2]
+if (!SOURCE_PATH) {
+  console.error('사용법: seedWordSet <entries.json 경로>')
+  process.exit(1)
+}
 
 interface RawEntry {
   word: string
