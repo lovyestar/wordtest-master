@@ -17,3 +17,7 @@ ui-debug.log
 .firebase/
 
 *.tsbuildinfo
+
+# Claude Code
+.claude/
+CLAUDE.md
