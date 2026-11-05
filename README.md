@@ -7,7 +7,7 @@
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20·%20Firestore%20·%20Functions-FFCA28.svg?logo=firebase&logoColor=black)](https://firebase.google.com)
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-F38020.svg?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com)
 
-### 고등학교 영단어 학습 · 감독 시험 웹 서비스 (with CheckStar)
+### 고등학교 영단어 학습 · 감독 시험 웹 서비스
 
 https://wordtest.example.com
 
@@ -34,10 +34,8 @@ https://wordtest.example.com
 * 전체화면 해제
 * 뒤로 가기 (Chromebook의 이전 페이지 키)
 * 두 개의 창으로 동시에 응시
-
-그리고 막는 것만큼 중요한 게 **"정말 했는지"를 선생님이 확인할 수 있는 근거**입니다.
-
-*CheckStar*는 시험 화면에서 이탈 이벤트를 감시하다가, 감지되는 즉시 응시를 취소하고  
+* 
+CheckStar는 시험 화면에서 이탈 이벤트를 감시하다가, 감지되는 즉시 응시를 취소하고  
 그 순간의 상태와 직전 행동을 서버 시각과 함께 남깁니다.
 
 ---
@@ -90,10 +88,7 @@ const disqualify = useCallback(async (type: ViolationType) => {
 0.0초 전  실격 처리됨
 ```
 
-입력한 답이나 일반 글자 키는 기록하지 않습니다. 단축키 조합과 `Tab`, `Escape` 같은 이름 있는 키만 남깁니다.
-
-> 모든 감시는 브라우저 이벤트에 기반합니다. 개발자 도구, 다른 기기 사용, 클라이언트 코드 조작은 막을 수 없고,
-> 알림 팝업 등으로 포커스가 빠지면 실격될 수 있습니다. 그래서 차단보다 **기록과 확인**에 무게를 둡니다.
+입력한 답이나 일반 글자 키는 기록하지 않습니다. 단축키 조합과 `Tab`, `Escape` 같은 이름 있는 키만 남깁니다. 모든 감시는 브라우저 이벤트에 기반합니다.
 
 ---
 
